@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{% load static %}
+<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}title{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .sidebar { 
+            width: 250px; 
+            background: #f8f9fa; 
+            height: 100vh; 
+            padding: 20px; 
+            position: fixed; 
+            top: 0; /* 确保侧边栏从页面顶部开始 */
+        }
+        .navbar { 
+            background: #6366F1; 
+            color: white; 
+            padding: 10px 25px; 
+            position: fixed; 
+            top: 0; 
+            left: 250px;  /* 从侧边栏宽度处开始 */
+            right: 0; 
+            z-index: 1030;
+        }
+        .content {
+            margin-left: 250px;
+        }
+        /* 去掉所有 submenu 内的默认圆点和内边距 */
+        .submenu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        /* 调整导航项的间距和字体样式 */
+        .nav-item {
+            margin-bottom: 10px;
+        }
+        .nav-text {
+            font-size: 16px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        /* 悬浮提示框 (Toast) 容器，固定在顶部 */
+        .toast-container {
+            position: fixed;
+            top: 0; /* 让提示框紧贴页面顶部 */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050; /* 确保不被其他元素遮挡 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            pointer-events: none; /* 避免影响页面交互 */
+            padding-top: 15px;
+        }
+        
+        /* 基础 Toast 样式（不包含背景颜色） */
+        /*改名为self-toast，以区分Bootstrap的toast*/
+        .self-toast {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            margin-bottom: 8px;
+            min-width: 300px;
+            max-width: 500px; /* 限制最大宽度，避免过长 */
+            text-align: center;
+            pointer-events: auto; /* 允许点击关闭 */
+        }
+        /* 不同消息类型对应的背景色 */
+        .toast-error {
+            background: rgba(255, 69, 58, 0.9); /* 红色：错误 */
+        }
+        .toast-success {
+            background: rgba(40, 167, 69, 0.9); /* 绿色：成功 */
+        }
+        .toast-info {
+            background: rgba(23, 162, 184, 0.9); /* 蓝色：其他信息 */
+        }
+        
+        /* Toast 关闭时的动画 */
+        .self-toast.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        /* 自定义关闭按钮样式 */
+        .self-toast .self-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+    {% block extra_css %}
+    {% endblock %}
+</head>
+<body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let toasts = document.querySelectorAll(".self-toast");
+            toasts.forEach(function (toast) {
+                // 设置5秒后自动消失
+                setTimeout(function () {
+                    toast.classList.add("fade-out");
+                    setTimeout(function () {
+                        toast.style.display = "none";
+                    }, 500);
+                }, 5000);
+                // 关闭按钮事件
+                let closeBtn = toast.querySelector(".self-close-btn");
+                closeBtn.addEventListener("click", function () {
+                    toast.classList.add("fade-out");
+                    setTimeout(function () {
+                        toast.style.display = "none";
+                    }, 500);
+                });
+            });
+        });
+    </script>
+    <!-- 浮动提示框容器（居中靠上） -->
+    <div class="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'error' in message.tags %}
+                    <div class="self-toast toast-error">
+                        {{ message }}
+                        <button class="self-close-btn">&times;</button>
+                    </div>
+                {% elif 'success' in message.tags %}
+                    <div class="self-toast toast-success">
+                        {{ message }}
+                        <button class="self-close-btn">&times;</button>
+                    </div>
+                {% else %}
+                    <div class="self-toast toast-info">
+                        {{ message }}
+                        <button class="self-close-btn">&times;</button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <h2 style="color:#6366F1;">Luxora</h2>
+        <ul class="nav flex-column">
+            {% block user %}
+                <li class="nav-item"><strong>菜单栏界面</strong></li>
+            {% endblock %}
+        </ul>
+        <footer class="mt-5">
+            <p class="text-muted">Luxora·民宿客房管理系统</p>
+        </footer>
+    </div>
+    <!-- 主体内容 -->
+    <div class="content">
+        <!-- 顶部导航栏 -->
+        <div class="navbar">
+            <div class="container-fluid">
+                {% block navbar %}
+                {% endblock %}
+            </div>
+        </div>
+        <!-- 页面内容 -->
+        <div class="container mt-4">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>

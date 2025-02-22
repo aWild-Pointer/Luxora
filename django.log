@@ -1,0 +1,37 @@
+Watching for file changes with StatReloader
+"POST / HTTP/1.1" 200 6581
+"POST / HTTP/1.1" 200 6584
+E:\python\Luxora\Luxora\settings.py changed, reloading.
+INFO 2025-02-22 12:08:32,135 autoreload Watching for file changes with StatReloader
+INFO 2025-02-22 13:00:13,160 autoreload E:\python\Luxora\Luxora\settings.py changed, reloading.
+INFO 2025-02-22 13:00:13,947 autoreload Watching for file changes with StatReloader
+INFO 2025-02-22 13:32:28,340 basehttp "POST / HTTP/1.1" 200 6572
+INFO 2025-02-22 13:37:33,913 autoreload E:\python\Luxora\Luxora\settings.py changed, reloading.
+INFO 2025-02-22 13:37:34,868 autoreload Watching for file changes with StatReloader
+INFO 2025-02-22 13:37:44,884 basehttp "POST / HTTP/1.1" 200 6572
+INFO 2025-02-22 13:42:05,766 autoreload E:\python\Luxora\Luxora\settings.py changed, reloading.
+INFO 2025-02-22 13:42:06,580 autoreload Watching for file changes with StatReloader
+INFO 2025-02-22 13:42:45,910 basehttp "POST / HTTP/1.1" 200 6572
+INFO 2025-02-22 13:43:49,931 autoreload E:\python\Luxora\Luxora\settings.py changed, reloading.
+INFO 2025-02-22 13:43:50,520 autoreload Watching for file changes with StatReloader
+INFO 2025-02-22 13:43:53,995 basehttp "POST / HTTP/1.1" 200 6572
+INFO 2025-02-22 13:44:07,459 basehttp "POST / HTTP/1.1" 200 6584
+INFO 2025-02-22 13:45:15,337 basehttp "POST / HTTP/1.1" 200 6584
+INFO 2025-02-22 13:51:54,985 autoreload E:\python\Luxora\Luxora\settings.py changed, reloading.
+INFO 2025-02-22 13:51:55,862 autoreload.run_with_reloader Watching for file changes with StatReloader
+INFO 2025-02-22 13:52:10,972 basehttp.log_message "POST / HTTP/1.1" 200 6572
+INFO 2025-02-22 19:56:58,303 autoreload.trigger_reload E:\python\Luxora\accounts\views.py changed, reloading.
+INFO 2025-02-22 19:56:58,868 autoreload.run_with_reloader Watching for file changes with StatReloader
+INFO 2025-02-22 19:57:35,162 autoreload.trigger_reload E:\python\Luxora\accounts\views.py changed, reloading.
+INFO 2025-02-22 19:57:35,620 autoreload.run_with_reloader Watching for file changes with StatReloader
+INFO 2025-02-22 21:27:18,333 basehttp.log_message "POST / HTTP/1.1" 200 6572
+INFO 2025-02-22 21:28:09,653 basehttp.log_message "POST / HTTP/1.1" 200 6637
+INFO 2025-02-22 21:28:09,696 basehttp.log_message "GET /static/favicon.ico HTTP/1.1" 304 0
+INFO 2025-02-22 21:38:47,321 autoreload.trigger_reload E:\python\Luxora\accounts\views.py changed, reloading.
+INFO 2025-02-22 21:38:47,750 autoreload.run_with_reloader Watching for file changes with StatReloader
+INFO 2025-02-22 21:39:56,799 autoreload.trigger_reload E:\python\Luxora\accounts\views.py changed, reloading.
+INFO 2025-02-22 21:39:57,190 autoreload.run_with_reloader Watching for file changes with StatReloader
+INFO 2025-02-22 21:42:16,514 basehttp.log_message "GET /register/ HTTP/1.1" 200 7486
+INFO 2025-02-22 21:43:13,624 basehttp.log_message "POST /register/ HTTP/1.1" 200 7755
+INFO 2025-02-22 21:43:44,442 autoreload.trigger_reload E:\python\Luxora\accounts\views.py changed, reloading.
+INFO 2025-02-22 21:43:44,916 autoreload.run_with_reloader Watching for file changes with StatReloader

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+<!-- 覆盖标题块 -->
+{% block title %}管理员{% endblock %}
+
+{% comment %}
+  在视图中传递了 active_page 变量，其值例如为：
+  'home'、'employee'、'room_status'、'order'、'customer'、'channel'、'statistics'、'settings'
+{% endcomment %}
+
+{% block extra_css %}
+    <style>
+        /* 定义菜单中当前页面的强调样式 */
+        .nav-item.active a {
+          background-color: #fff !important;
+          color: #6366F1 !important;
+          font-weight: bold;
+          border-radius: 5px;
+          transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+{% endblock %}
+
+{% block user %}
+    <li class="nav-item">
+        <strong style="color:#6366F1;">管理员账户：{{ user.employee_name }}</strong>
+    {% block function %}
+    {% endblock %}
+    </li>
+{% endblock %}
+
+{% block navbar %}
+    <ul class="nav">
+        <li class="nav-item {% if active_page == 'home' %}active{% endif %}">
+            <a class="nav-link text-white" href="{% url 'manager' %}">首页</a>
+        </li>
+        <li class="nav-item {% if active_page == 'employee' %}active{% endif %}">
+            <a class="nav-link  text-white" href="{% url 'manager_add_employee' %}">员工</a>
+        </li>
+        <li class="nav-item {% if active_page == 'room' %}active{% endif %}">
+            <a class="nav-link text-white" href="{% url 'add_room_type' %}">房态</a>
+        </li>
+        <li class="nav-item {% if active_page == 'order' %}active{% endif %}">
+            <a class="nav-link text-white" href="#">订单</a>
+        </li>
+        <li class="nav-item {% if active_page == 'customer' %}active{% endif %}">
+            <a class="nav-link text-white" href="#">客户</a>
+        </li>
+        <li class="nav-item {% if active_page == 'channel' %}active{% endif %}">
+            <a class="nav-link text-white" href="#">渠道</a>
+        </li>
+        <li class="nav-item {% if active_page == 'statistics' %}active{% endif %}">
+            <a class="nav-link text-white" href="#">统计</a>
+        </li>
+        <li class="nav-item {% if active_page == 'settings' %}active{% endif %}">
+            <a class="nav-link text-white" href="#">设置</a>
+        </li>
+    </ul>
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-8">
+            <div class="p-5 mb-4 bg-light rounded-3 shadow">
+                <h1 class="display-3 text-center" style="color:#6366F1;">欢迎登录 Luxora 民宿客房管理系统</h1>
+                <p class="lead text-center" >
+                    请使用导航栏进入各项管理功能，开始高效管理您的民宿客房。
+                </p>
+                <p class="display-6 text-center" style="color:#6366F1;" >
+                    当前民宿：{{ homestay_name }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

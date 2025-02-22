@@ -1,0 +1,133 @@
+{% extends 'rooms/add_room_type.html' %}
+
+
+{% block frame_content2 %}
+
+    <style>
+        /* 外层容器样式 */
+        .RoomType-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        /* 表格整体样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        /* 表格单元格样式 */
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        /* 表头背景 */
+        th {
+            background-color: #f2f2f2;
+        }
+        /* 奇偶行背景色 */
+        tbody tr:nth-child(even) {
+            background-color: #fbfbfb;
+        }
+        /* 分页导航样式（使用 Flexbox 居中） */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .page-links a {
+            margin: 0 5px;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            text-decoration: none;
+            color: #333;
+        }
+        .page-links a:hover {
+            background-color: #e9e9e9;
+        }
+        .page-current {
+            margin: 0 5px;
+            padding: 6px 12px;
+            font-weight: bold;
+        }
+        /* 模仿链接文字样式 */
+        .action-button {
+        background: none;
+        border: none;
+        color: #007bff;
+        {#text-decoration: underline;#}
+        cursor: pointer;
+        font-size: inherit;
+        padding: 0;
+    }
+
+    </style>
+
+    <div class="RoomType-container">
+        <h1 style="text-align:center;">房型</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:center;">序号</th>
+                    <th>名称</th>
+                    <th>人数</th>
+                    <th>门市价</th>
+                    <th>附加价</th>
+                    <th>介绍</th>
+                    <th>总数</th>
+                    <th>可用</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for RoomType in page_obj %}
+                    <tr>
+                        <td style="text-align:center;">{{ forloop.counter }}</td>
+                        <td>{{ RoomType.type_name }}</td>
+                        <td>{{ RoomType.capacity }}</td>
+                        <td>{{ RoomType.base_price }}</td>
+                        <td>{{ RoomType.extra_price }}</td>
+                        <td>{{ RoomType.introduction }}</td>
+                        <td>{{ RoomType.total }}</td>
+                        <td>{{ RoomType.remaining }}</td>
+                        <td style="white-space: nowrap;">
+                            <button type="button" class="action-button" onclick="window.location.href='#'; ">详情</button> |
+                            <button type="button" class="action-button" onclick="window.location.href='#'; ">新增</button> |
+                            <button type="button" class="action-button" onclick="window.location.href='#'; ">删除</button>
+{#                            <button type="button" class="action-button" onclick="window.location.href='#'; "></button>#}
+
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center;">暂无房型数据</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 分页导航 -->
+        <div class="pagination">
+            <div class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; 第一页</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                {% endif %}
+
+                <span class="page-current">
+                    第 {{ page_obj.number }} 页，共 {{ page_obj.paginator.num_pages }} 页
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">最后一页 &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

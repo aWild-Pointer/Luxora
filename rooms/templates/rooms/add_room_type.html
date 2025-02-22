@@ -1,0 +1,103 @@
+{% extends 'accounts/manager/manager.html' %}
+
+{% block function %}
+    <style>
+        /* 设置 active 状态下的菜单项样式 */
+        .nav-link.active {
+            background-color: #6366F1 !important;
+            color: #fff !important;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 5px 10px; /* 根据需要调整，确保背景区域与文字间隔自然 */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+    <li class="nav-item">
+    <span class="nav-text">房态</span>
+    <ul class="submenu">
+        <li>
+            <a class="nav-link {% if active_function == 'room_overview' %}active{% endif %}" href="#">总览</a>
+        </li>
+        <li>
+            <a class="nav-link {% if active_function == 'add_room_type' %}active{% endif %}" href="{% url 'add_room_type' %}">新增房型</a>
+        </li>
+        <li>
+            <a class="nav-link {% if active_function == 'query_room_type' %}active{% endif %}" href="{% url 'query_room_type' %}">房型设置</a>
+        </li>
+    </ul>
+
+{% endblock %}
+
+
+{% block content %}
+    <style>
+        input[type="time"] {
+            font-size: 1.25rem; /* 根据需要调整大小 */
+        }
+
+    </style>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            {% block frame_content2 %}
+                <div class="col-md-5">
+                    <!-- 使用 Bootstrap 的 card 组件，并添加 bg-light 来设置背景为浅灰色 -->
+                    <div class="card shadow mt-5 bg-light">
+                        <div class="card-body">
+                            {% block content2 %}
+                                <h2 class="card-title text-center mb-4">新增房型</h2>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="type_name" class="form-label">房型名称</label>
+                                        <input type="text" class="form-control" id="type_name" name="type_name" required >
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="capacity" class="form-label">入住人数</label>
+                                        <input type="number" class="form-control" id="capacity" name="capacity" required min="1" step="1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="base_price" class="form-label">基础价格（元）</label>
+                                        <input type="number" class="form-control" id="base_price" name="base_price" required  min="0" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="extra_price" class="form-label">节假日附加价格（元）· 默认0元</label>
+                                        <input type="number" class="form-control" id="extra_price" name="extra_price" required  min="0" step="0.01" value="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <!-- 当天 入住时间 -->
+                                            <div class="col-md-6">
+                                                <label for="expected_check_in" class="form-label">入住时间</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">当天</span>
+                                                    <input type="time" class="form-control" id="expected_check_in " name="expected_check_in " required>
+                                                </div>
+                                            </div>
+                                            <!-- 次日 退房时间 -->
+                                            <div class="col-md-6">
+                                                <label for="expected_check_out" class="form-label">退房时间</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">次日</span>
+                                                    <input type="time" class="form-control" id="expected_check_out" name="expected_check_out" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="introduction" class="form-label">房型介绍</label>
+{#                                        <input type="text" class="form-control" id="introduction" name="introduction" required>#}
+                                        {# rows可调行数，决定垂直高度 #}
+                                        <textarea class="form-control" id="introduction" name="introduction" rows="3" ></textarea>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">提交</button>
+                                    </div>
+                                </form>
+                            {% endblock %}
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "accounts/manager/manager.html" %}
+
+<!-- 覆盖标题块 -->
+{% block title %}管理员{% endblock %}
+
+{% block function %}
+    <style>
+        /* 设置 active 状态下的菜单项样式 */
+        .nav-link.active {
+            background-color: #6366F1 !important;
+            color: #fff !important;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 5px 10px; /* 根据需要调整，确保背景区域与文字间隔自然 */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+    <li class="nav-item">
+    <span class="nav-text">员工管理</span>
+    <ul class="submenu">
+        <li>
+            <a class="nav-link {% if active_function == 'add_employee' %}active{% endif %}" href="{% url 'manager_add_employee' %}">新增员工</a>
+        </li>
+        <li>
+            <a class="nav-link {% if active_function == 'query_employee' %}active{% endif %}" href="{% url 'manager_query_employee' %}">员工列表</a>
+        </li>
+    </ul>
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-fluid py-5">
+        <div class="row justify-content-center">
+            {% block frame_content2 %}
+                <div class="col-md-6">
+                    <!-- 使用 Bootstrap 的 card 组件，并添加 bg-light 来设置背景为浅灰色 -->
+                    <div class="card shadow mt-5 bg-light">
+                        <div class="card-body">
+                            {% block content2 %}
+                                <h2 class="card-title text-center mb-4">新增员工账号</h2>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="id" class="form-label">工号</label>
+                                        <input type="text" class="form-control" id="id" name="id" required pattern="\d+" title="工号只能包含数字">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">姓名</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">密码</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="role" class="form-label">职位</label>
+                                        <select class="form-control" id="role" name="role" required>
+                                            <option value="" disabled selected>请选择职位</option>
+                                            <option value="manager">民宿管理员</option>
+                                            <option value="reception">民宿前台</option>
+                                            <option value="cleaner">民宿保洁</option>
+                                        </select>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">提交</button>
+                                    </div>
+                                </form>
+                            {% endblock %}
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

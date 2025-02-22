@@ -1,0 +1,73 @@
+{% extends 'accounts/manager/manager_add_employee.html' %}
+
+{% block frame_content2 %}
+    <h1 class="text-center mb-4">员工列表</h1>
+    <div class="container">
+        <div class="row">
+            {% for employee in page_obj %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        {{ employee.employee_name }}
+                    </div>
+                    <div class="card-body">
+                        <p><strong>角色:</strong> {{ employee.role }}</p>
+                        <p><strong>工号:</strong> {{ employee.employee_id }}</p>
+                        <p><strong>民宿:</strong> {{ employee.homestay.name }}</p>
+                        <p><strong>手机:</strong> {{ employee.employee_phone }}</p>
+                        <p><strong>身份证:</strong> {{ employee.employee_IDcard }}</p>
+                        <p><strong>通讯地址:</strong> {{ employee.employee_address }}</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="#" class="btn btn-primary btn-sm">详情</a>
+                        <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗？')">删除</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>暂无员工数据</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 分页导航，居中显示 -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo; 第一页</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">上一页</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        第 {{ page_obj.number }} 页，共 {{ page_obj.paginator.num_pages }} 页
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">下一页</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">最后一页 &raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+{% endblock %}
