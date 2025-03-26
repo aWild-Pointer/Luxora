@@ -1,0 +1,157 @@
+{% extends "accounts/reception/reception.html" %}
+
+{% block extra_css %}
+    <style>
+        .search-container {
+            text-align: center;
+        }
+
+        /* 让搜索框贴合顶部导航栏 */
+        .search-box {
+            margin-top: 0; /* 让其与顶部导航栏贴合 */
+            /* 圆角 */
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* 外层容器样式 */
+        .order-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px auto;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 20px; /* 根据需要调整，确保背景区域与文字间隔自然 */
+
+        }
+    </style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let checkInInput = document.getElementById("expected_check_in_time");
+        if (!checkInInput.value) {  // 仅在无查询值时填充
+            let today = new Date().toISOString().split("T")[0]; // 获取 YYYY-MM-DD 格式
+            checkInInput.value = today;
+        }
+    });
+
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <!-- 搜索框区域 -->
+            <div class="col-12">
+                <div class="card shadow-sm search-box mt-0">
+                    <div class="card-body">
+                        <div class="search-container">
+                            <form method="GET" action="">
+                                <!-- 输入框：按手机号或姓名搜索 -->
+                                <div class="search-option-text">手机</div>
+                                <input type="text"
+                                       name="customer_phone"
+                                       style="width: 150px"
+                                       placeholder="请输入手机号"
+                                       value="{{ request.GET.customer_phone|default_if_none:'' }}">
+                                <div class="search-option-text">姓名</div>
+                                <input type="text"
+                                       name="customer_name"
+                                       style="width: 100px"
+                                       placeholder="请输入姓名"
+                                       value="{{ request.GET.customer_name|default_if_none:'' }}">
+                                <div class="search-option-text">证件</div>
+                                <input type="text"
+                                       name="customer_IDcard"
+                                       style="width: 200px"
+                                       placeholder="请输入证件号"
+                                       value="{{ request.GET.customer_IDcard|default_if_none:'' }}">
+
+
+                                <div class="search-option-text">离店日期</div>
+                                <input type="date"
+                                       id="expected_check_out_date"
+                                       name="expected_check_out_date"
+                                       value="{{ request.GET.expected_check_out_date|default_if_none:'' }}">
+
+                                <div class="search-option-text">
+                                    <button type="submit" class="btn btn-primary rounded">搜索</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-container">
+
+{#        <h1 style="text-align:center; margin-top: 2px">订单列表</h1>#}
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:center;">序号</th>
+                    <th>订单号</th>
+                    <th>姓名</th>
+                    <th>身份证</th>
+                    <th>手机</th>
+                    <th>入住日期</th>
+                    <th>离店日期</th>
+                    <th>房型</th>
+                    <th>金额</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in page_obj %}
+                    <tr>
+                        <td style="text-align:center;">{{ forloop.counter }}</td>
+                        <td>{{ order.order_id }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>{{ order.customer_IDcard }}</td>
+                        <td>{{ order.customer_phone }}</td>
+                        <td>{{ order.expected_check_in_date|date:'Y-m-d' }}</td>
+                        <td>{{ order.expected_check_out_date|date:'Y-m-d' }}</td>
+                        <td>{{ order.room_type_snapshot }}</td>
+                        <td>{{ order.amounts }}</td>
+                        <td style="white-space: nowrap;">
+{#                            <button type="button" class="action-button" onclick="window.location.href='{% url 'delete_order' order.order_id %}?page={{ page_obj.number }}'; ">办理入住</button> |#}
+                            <button type="button" class="action-button" onclick="window.location.href='{% url "check_in" order.order_id %}?page={{ page_obj.number }}'; ">办理入住</button>
+
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="12" style="text-align:center;">暂无今日的入住订单</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 分页导航 -->
+        <div class="pagination">
+            <div class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; 第一页</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                {% endif %}
+
+                <span class="page-current">
+                    第 {{ page_obj.number }} 页，共 {{ page_obj.paginator.num_pages }} 页
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">最后一页 &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}

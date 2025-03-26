@@ -1,0 +1,160 @@
+{% extends 'create_order.html' %}
+
+{% block content %}
+    <style>
+        .search-container {
+            text-align: center;
+        }
+
+        /* 让搜索框贴合顶部导航栏 */
+        .search-box {
+            margin-top: 0; /* 让其与顶部导航栏贴合 */
+            /* 圆角 */
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* 外层容器样式 */
+        .order-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px auto;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 20px; /* 根据需要调整，确保背景区域与文字间隔自然 */
+
+        }
+        .search-container input[type="text"] {
+            width: 300px; /* 设置输入框宽度 */
+            height: 40px; /* 设置输入框高度 */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow-sm search-box mt-0">
+                    <div class="card-body">
+                        <!-- 搜索区域 -->
+                        <div class="search-container">
+                            <form method="GET" action="">
+                                <!-- 输入框：搜索 -->
+                                <input type="text"
+{#                                       name="order_id"#}
+{#                                       placeholder="请输入订单号/姓名/身份证/手机号"
+                                       name="search_query"
+{#                                       placeholder="请输入订单号"#}
+                                       value="{{ request.GET.search_query|default_if_none:'' }}">
+
+                                <!-- 下拉框：如果需要保持搜索后仍显示用户选择的值，则可以对选项进行判断 selected -->
+                                <div class="search-option-text">订单状态</div>
+                                <select type="select" id="order_status" name="order_status">
+                                    <option value="">全部</option>
+                                    <option value="booked" {% if request.GET.order_status == 'booked' %}selected{% endif %}>已预订</option>
+                                    <option value="checked_in" {% if request.GET.order_status == 'checked_in' %}selected{% endif %}>已入住</option>
+                                    <option value="checked_out" {% if request.GET.order_status == 'checked_out' %}selected{% endif %}>已退房</option>
+                                    <option value="cancelled" {% if request.GET.order_status == 'cancelled' %}selected{% endif %}>已取消</option>
+                                    <option value="finished" {% if request.GET.order_status == 'finished' %}selected{% endif %}>已完成</option>
+                                </select>
+
+                                <div class="search-option-text">入住日期</div>
+                                <input type="date"
+                                       id="expected_check_in_date"
+                                       name="expected_check_in_date"
+                                       value="{{ request.GET.expected_check_in_date|default_if_none:'' }}">
+
+                                <div class="search-option-text">离店日期</div>
+                                <input type="date"
+                                       id="expected_check_out_date"
+                                       name="expected_check_out_date"
+                                       value="{{ request.GET.expected_check_out_date|default_if_none:'' }}">
+
+
+                                <div class="search-option-text">
+                                    <button type="submit">搜索</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="order-container">
+
+        <h1 style="text-align:center;">订单列表</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:center;">序号</th>
+                    <th>订单号</th>
+                    <th>状态</th>
+                    <th>姓名</th>
+                    <th>身份证</th>
+                    <th>手机</th>
+                    <th>入住时间</th>
+                    <th>离店时间</th>
+                    <th>房型</th>
+                    <th>金额</th>
+                    <th>是否支付</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in page_obj %}
+                    <tr>
+                        <td style="text-align:center;">{{ forloop.counter }}</td>
+                        <td>{{ order.order_id }}</td>
+                        <td>{{ order.get_order_status_display }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>{{ order.customer_IDcard }}</td>
+                        <td>{{ order.customer_phone }}</td>
+                        <td>{{ order.expected_check_in_date|date:'Y-m-d' }}</td>
+                        <td>{{ order.expected_check_out_date|date:'Y-m-d' }}</td>
+                        <td>{{ order.room_type_snapshot }}</td>
+                        <td>{{ order.amounts }}</td>
+                        <td>{{ order.is_pay }}</td>
+                        <td style="white-space: nowrap;">
+                            <button type="button" class="action-button" onclick="window.location.href='{% url 'order_info' order.order_id %}'; ">详情</button> |
+                            <button type="button" class="action-button" onclick="window.location.href='{% url 'cancel_order' order.order_id %}?page={{ page_obj.number }}'; ">取消</button> |
+{#                            <button type="button" class="action-button" onclick="window.location.href='{% url 'check_in' order.order_id %}?page={{ page_obj.number }}'; ">入住</button> |#}
+{#                            <button type="button" class="action-button" onclick="window.location.href='{% url 'delete_order' order.order_id %}?page={{ page_obj.number }}'; ">退房</button> |#}
+
+
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="12" style="text-align:center;">暂无订单数据</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 分页导航 -->
+        <div class="pagination">
+            <div class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; 第一页</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                {% endif %}
+
+                <span class="page-current">
+                    第 {{ page_obj.number }} 页，共 {{ page_obj.paginator.num_pages }} 页
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">最后一页 &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

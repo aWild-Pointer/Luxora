@@ -1,0 +1,262 @@
+{% extends 'accounts/manager/manager.html' %}
+
+{% block title %}{{ homestay_name }} 订单{% endblock %}
+
+{% block extra_css %}
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+{% endblock %}
+
+{% block function %}
+    <li class="nav-item">
+        <span class="nav-text">订单</span>
+        <ul class="submenu">
+            <li>
+                <a class="nav-link {% if active_function == 'create_order' %}active{% endif %}" href="{% url 'create_order' %}">创建订单</a>
+            </li>
+            <li>
+                <a class="nav-link {% if active_function == 'manage_order' %}active{% endif %}" href="{% url 'query_order' %}">订单管理</a>
+            </li>
+            <li>
+                <a class="nav-link {% if active_function == 'order_settings' %}active{% endif %}" href="#">订单设置</a>
+            </li>
+        </ul>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid py-1">
+        <div class="row justify-content-center">
+            {% block frame_content2 %}
+                <div class="col-md-8">
+                    <!-- 订单表单卡片 -->
+                    <div class="card shadow mt-5 bg-light">
+                        <div class="card-body">
+                            {% block content2 %}
+                                <h2 class="card-title text-center mb-4">订单</h2>
+                                <form method="post">
+                                    {% csrf_token %}
+
+                                    <!-- 订单状态选择 -->
+                                    <div class="mb-3">
+                                        <label for="order_status" class="form-label">订单状态</label>
+                                        <select class="form-select" id="order_status" name="order_status">
+                                            <option value="" hidden disabled selected>请选择订单状态</option>
+                                            <option value="booked">已预订</option>
+                                            <option value="checked_in">已入住</option>
+                                            <option value="checked_out">已退房</option>
+                                            <option value="cancelled">已取消</option>
+                                            <option value="finished">已完成</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- 入住时间及天数 -->
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <!-- 入住日期 -->
+                                            <div class="col-md-3">
+                                                <label for="expected_check_in_time" class="form-label">入住日期时间</label>
+                                                <input type="date" class="form-control" id="expected_check_in_time" name="expected_check_in_time" onchange="calculateCheckOutDate()">
+                                            </div>
+
+                                            <!-- 入住天数 -->
+                                            <div class="col-md-3">
+                                                <label for="days" class="form-label">入住天数</label>
+                                                <input type="number" class="form-control" id="days" name="days" min="1" value="1" onchange="calculateCheckOutDate()">
+                                            </div>
+
+                                            <!-- 离店日期 -->
+                                            <div class="col-md-3">
+                                                <label for="expected_check_out_time" class="form-label">离店日期时间</label>
+                                                <input type="date" class="form-control" id="expected_check_out_time" name="expected_check_out_time" readonly>
+                                            </div>
+                                        </div>
+                                        <!-- 当日凌晨入住选项 -->
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="midnight_check_in" onchange="toggleMidnightCheckIn()">
+                                                <label class="form-check-label" for="midnight_check_in">
+                                                    当日（凌晨）入住
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- 房型与房号选择 -->
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="type_id" class="form-label">房型</label>
+                                                <select class="form-select" id="type_id" name="type_id"
+{#                                                        hx-get="{% url 'load_rooms' %}"#}
+                                                        hx-target="#room_number"
+                                                        hx-trigger="change"
+                                                        hx-include="#expected_check_in_time,#expected_check_out_time">
+                                                    <option value="" hidden disabled selected>请选择房型</option>
+                                                    {% for room_type in room_types %}
+                                                        <option value="{{ room_type.type_id }}">{{ room_type.type_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="room_number" class="form-label">房号</label>
+                                                <select class="form-select" id="room_number" name="room_number">
+                                                    <option value="" hidden disabled selected>请选择房号</option>
+                                                    <option value="">自动分配</option>
+                                                </select>
+                                            </div>
+{#                                            <div class="col-md-6">#}
+{#                                                <label for="" class="form-label">剩余数</label>#}
+{#                                            </div>#}
+                                        </div>
+                                    </div>
+
+                                    <!-- 订单人信息 -->
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <label for="customer_name" class="form-label">订单人姓名</label>
+                                                <input type="text" class="form-control" id="customer_name" name="customer_name">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="customer_id_card" class="form-label">订单人身份证</label>
+                                                <input type="text" class="form-control" id="customer_id_card" name="customer_id_card">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="customer_phone" class="form-label">订单人手机号</label>
+                                                <input type="text" class="form-control" id="customer_phone" name="customer_phone"></input>
+                                            </div>
+                                            <div class="col-md-3 d-flex align-items-end">
+                                                <button type="button" class="btn btn-primary" onclick="addCustomerAsOccupant()">添加为入住人</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 入住人信息动态添加 -->
+                                    <div class="mb-3">
+                                        <label class="form-label">入住人信息</label>
+                                        <div id="occupant-info">
+                                            <div class="row occupant-entry ">
+{#                                                <div class="col-md-5">#}
+{#                                                    <input type="text" class="form-control" name="occupant_name[]" placeholder="姓名">#}
+{#                                                </div>#}
+{#                                                <div class="col-md-5">#}
+{#                                                    <input type="text" class="form-control" name="occupant_id_card[]" placeholder="身份证号">#}
+{#                                                </div>#}
+{#                                                <div class="col-md-2">#}
+{#                                                    <button type="button" class="btn btn-danger" onclick="removeOccupant(this)">删除</button>#}
+{#                                                </div>#}
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary mt-2" onclick="addOccupant()">添加入住人</button>
+                                    </div>
+
+                                    <!-- 提交按钮 -->
+                                    <button type="submit" class="btn btn-primary">提交订单</button>
+                                    <!-- 新增：同时办理入住按钮 -->
+{#                                    <button type="button" class="btn btn-success" onclick="submitAndCheckIn()">同时办理入住</button>#}
+                                </form>
+                            {% endblock %}
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    /** 计算离店日期（仅保留日期部分） */
+                    function calculateCheckOutDate() {
+                        let checkInInput = document.getElementById("expected_check_in_time");
+                        let daysInput = document.getElementById("days");
+                        let checkOutInput = document.getElementById("expected_check_out_time");
+
+                        if (checkInInput.value && daysInput.value) {
+                            let checkInDate = new Date(checkInInput.value);
+                            let stayDays = parseInt(daysInput.value);
+
+                            if (!isNaN(checkInDate.getTime()) && stayDays > 0) {
+                                // 计算离店日期（不再在这里额外减一天）
+                                let checkOutDate = new Date(checkInDate);
+                                checkOutDate.setDate(checkOutDate.getDate() + stayDays);
+                                checkOutInput.value = checkOutDate.toISOString().split("T")[0]; // 仅保留日期部分
+                            }
+                        }
+                    }
+
+                    /** 处理“当日（凌晨）入住”选项 */
+                    function toggleMidnightCheckIn() {
+                        let midnightCheckBox = document.getElementById("midnight_check_in");
+                        let checkInInput = document.getElementById("expected_check_in_time");
+
+                        if (midnightCheckBox.checked) {
+                            let today = new Date();
+                            let formattedToday = today.toISOString().split("T")[0];
+
+                            // 如果用户勾选“凌晨入住”，将入住日期设为“今天的前一天”
+                            let checkInDate = new Date(formattedToday);
+                            checkInDate.setDate(checkInDate.getDate() - 1);
+                            checkInInput.value = checkInDate.toISOString().split("T")[0]; // 更新入住日期
+                        }
+
+                        calculateCheckOutDate(); // 重新计算离店时间
+                    }
+
+                    // 监听入住日期和天数的变化，自动计算离店时间
+                    document.getElementById("expected_check_in_time").addEventListener("change", calculateCheckOutDate);
+                    document.getElementById("days").addEventListener("input", calculateCheckOutDate);
+                    document.getElementById("midnight_check_in").addEventListener("change", toggleMidnightCheckIn);
+
+
+                    function addCustomerAsOccupant() {
+                        let occupantInfo = document.getElementById("occupant-info");
+                        let customerName = document.getElementById("customer_name").value;
+                        let customerIdCard = document.getElementById("customer_id_card").value;
+
+                        if (customerName.trim() === "" || customerIdCard.trim() === "") {
+                            alert("请填写完整的订单人姓名和身份证号！");
+                            return;
+                        }
+
+                        let newOccupant = document.createElement("div");
+                        newOccupant.classList.add("row", "occupant-entry", "mt-2");
+                        newOccupant.innerHTML = `
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="occupant_name[]" value="${customerName}" placeholder="姓名">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="occupant_id_card[]" value="${customerIdCard}" placeholder="身份证号">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger" onclick="removeOccupant(this)">删除</button>
+                            </div>
+                        `;
+                        occupantInfo.appendChild(newOccupant);
+                    }
+
+                    /** 添加入住人 */
+                    function addOccupant() {
+                        let occupantInfo = document.getElementById("occupant-info");
+                        let newOccupant = document.createElement("div");
+                        newOccupant.classList.add("row", "occupant-entry", "mt-2");
+                        newOccupant.innerHTML = `
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="occupant_name[]" placeholder="姓名">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="occupant_id_card[]" placeholder="身份证号">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger" onclick="removeOccupant(this)">删除</button>
+                            </div>
+                        `;
+                        occupantInfo.appendChild(newOccupant);
+                    }
+
+                    /** 删除入住人 */
+                    function removeOccupant(button) {
+                        button.parentElement.parentElement.remove();
+                    }
+                </script>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

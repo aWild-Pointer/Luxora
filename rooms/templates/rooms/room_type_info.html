@@ -1,0 +1,96 @@
+{% extends 'rooms/add_room_type.html' %}
+
+{% block content2 %}
+<h1 class="text-center mb-4">房型详情</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <form method="post" action="{% url 'edit_room_type_info' room_type.type_id %}?page={{ page }}">
+            {% csrf_token %}
+            <div class="card-body">
+                <p>
+                    <strong>房型名称：</strong>
+                    <span id="room_type_name_view">{{ room_type.type_name }}</span>
+                    <input type="text" id="room_type_name_edit" name="type_name" class="form-control d-none" value="{{ room_type.type_name }}">
+                </p>
+                <p>
+                    <strong>入住人数：</strong>
+                    <span id="room_type_capacity_view">{{ room_type.capacity }}</span>
+                    <input type="number" id="room_type_capacity_edit" name="capacity" class="form-control d-none" value="{{ room_type.capacity }}">
+                </p>
+                <p>
+                    <strong>门市价：</strong>
+                    <span id="room_type_base_price_view">{{ room_type.base_price }}</span>
+                    <input type="number" id="room_type_base_price_edit" name="base_price" class="form-control d-none" value="{{ room_type.base_price }}">
+                </p>
+                <p>
+                    <strong>附加价：</strong>
+                    <span id="room_type_extra_price_view">{{ room_type.extra_price }}</span>
+                    <input type="number" id="room_type_extra_price_edit" name="extra_price" class="form-control d-none" value="{{ room_type.extra_price }}">
+                </p>
+                <p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="expected_check_in_view" class="form-label">入住时间</label>
+                            <div class="input-group ">
+                                <span class="input-group-text">当天</span>
+                                <span id="expected_check_in_view" class="form-control">{{ room_type.expected_check_in|time:'H:i' }}</span>
+                                <input type="time" class="form-control d-none" id="expected_check_in_edit" name="expected_check_in" value="{{ room_type.expected_check_in|time:'H:i' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="expected_check_out_view" class="form-label">退房时间</label>
+                            <div class="input-group">
+                                <span class="input-group-text">次日</span>
+                                <span id="expected_check_out_view" class="form-control">{{ room_type.expected_check_out|time:'H:i' }}</span>
+                                <input type="time" class="form-control d-none" id="expected_check_out_edit" name="expected_check_out" value="{{ room_type.expected_check_out|time:'H:i' }}">
+                            </div>
+                        </div>
+                    </div>
+                </p>
+                <p>
+                    <strong>房型介绍：</strong>
+                    <span id="room_type_introduction_view">{{ room_type.introduction }}</span>
+                    <textarea id="room_type_introduction_edit" name="introduction" class="form-control d-none">{{ room_type.introduction }}</textarea>
+                </p>
+            </div>
+
+            <!-- 按钮 -->
+            <div id="view_buttons" class="text-center">
+                <button type="button" class="btn btn-primary" onclick="toggleEdit(true)">编辑</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'query_room_type' %}?page={{ page }}';">返回</button>
+            </div>
+            <div id="edit_buttons" class="d-none text-center">
+                <button type="button" class="btn btn-danger" onclick="toggleEdit(false)">取消</button>
+                <button type="submit" class="btn btn-success" onclick="return confirm('确定修改该房型信息吗？');">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// 切换显示和隐藏视图和编辑状态下的元素
+function toggleEdit(editMode) {
+    // 获取查看模式的元素
+    var view_elems = document.querySelectorAll('#room_type_name_view, #room_type_capacity_view, #room_type_base_price_view, #room_type_extra_price_view, #room_type_introduction_view, #expected_check_in_view, #expected_check_out_view');
+    // 获取编辑模式的输入框
+    var edit_elems = document.querySelectorAll('#room_type_name_edit, #room_type_capacity_edit, #room_type_base_price_edit, #room_type_extra_price_edit, #room_type_introduction_edit, #expected_check_in_edit, #expected_check_out_edit');
+    // 按钮容器
+    var view_btns = document.getElementById('view_buttons');
+    var edit_btns = document.getElementById('edit_buttons');
+
+    if(editMode) {
+        // 进入编辑模式
+        view_elems.forEach(el => el.classList.add('d-none'));
+        edit_elems.forEach(el => el.classList.remove('d-none'));
+        view_btns.classList.add('d-none');
+        edit_btns.classList.remove('d-none');
+    } else {
+        // 退出编辑模式
+        view_elems.forEach(el => el.classList.remove('d-none'));
+        edit_elems.forEach(el => el.classList.add('d-none'));
+        view_btns.classList.remove('d-none');
+        edit_btns.classList.add('d-none');
+    }
+}
+</script>
+{% endblock %}

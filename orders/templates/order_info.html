@@ -1,0 +1,132 @@
+{% extends 'create_order.html' %}
+
+{% block extra_css %}
+    <style>
+    /* 分割线*/
+    hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(to right, black, #555, black);
+        margin: 20px 0;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+{#<h1 class="text-center mb-4">订单详情</h1>#}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow p-4">
+                <div class="card-body">
+
+                    <!-- 订单基本信息 -->
+                    <h5 class="mb-3">订单信息</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>订单号：</strong> {{ order.order_id }}</td>
+                            <td><strong>状态：</strong> {{ order.get_order_status_display }}</td>
+                            <td><strong>创建时间：</strong> {{ order.created_at|date:'Y-m-d H:i' }}</td>
+                        </tr>
+                    </table>
+
+                    <hr>
+
+                    <!-- 预订人信息 -->
+                    <h5 class="mb-3">订单人信息</h5>
+                    <table class="table table-borderd">
+                        <tr>
+                            <td><strong>姓名：</strong> {{ order.customer_name }}</td>
+                            <td><strong>身份证：</strong> {{ order.customer_IDcard }}</td>
+                            <td><strong>手机号：</strong> {{ order.customer_phone }}</td>
+                        </tr>
+                    </table>
+
+                    <hr>
+
+                    <!-- 入住信息 -->
+                    <h5 class="mb-3">入住信息</h5>
+                    <div class="card p-3 shadow-sm mb-3">
+                        <table class="table table-borderd">
+                            <tr>
+                                <td><strong>入住日期：</strong> {{ order.expected_check_in_date|date:'Y-m-d' }}</td>
+                                <td><strong>退房日期：</strong> {{ order.expected_check_out_date|date:'Y-m-d' }}</td>
+                                <td><strong>入住天数：</strong> {{ order.days }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>预期到店：</strong> {{ order.expected_check_in_time|date:'H:i' }}</td>
+                                <td><strong>预期离店：</strong> {{ order.expected_check_out_time|date:'H:i' }}</td>
+                                <td><strong>预期人数：</strong> {{ order.room_type.capacity }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>民宿：</strong> {{ order.homestay.name }}</td>
+                                <td><strong>房型：</strong> {{ order.room_type_snapshot }}</td>
+                                <td><strong>房号：</strong> {% if order.room %} {{ order.room.room_number }} {% else %} 未分配 {% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>实际入住：</strong> {{ order.check_in_datetime|date:'Y-m-d H:i' }}</td>
+                                <td><strong>实际退房：</strong> {{ order.check_out_datetime|date:'Y-m-d H:i' }}</td>
+                                <td><strong>实际人数：</strong> {{ order.occupants_num }} </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <hr>
+
+                    <!-- 入住人信息 -->
+                    <h5 class="mb-3">入住人信息</h5>
+                    <div class="card p-3 shadow-sm">
+                        <div class="row">
+                            {% for occupant in order.occupants.all %}
+                                <div class="col-md-6">
+                                    <div class="card shadow-sm p-2 mb-2">
+                                        <div class="card-body">
+                                            <p><strong>入住人：</strong> {{ occupant.name }}</p>
+                                            <p><strong>身份证：</strong> {{ occupant.id_card }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="col-md-12">
+                                    <p class="text-muted text-center">暂无入住人</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- 费用信息 -->
+                    <h5 class="mb-3">费用信息</h5>
+                    <table class="table table-borderd">
+                        <tr>
+                            <td><strong>订单金额：</strong> ¥{{ order.amounts }}</td>
+                            <td><strong>支付状态：</strong> {% if order.is_pay %} 已支付 {% else %} 未支付 {% endif %}</td>
+                            {% if order.is_pay %}
+                                <td><strong>支付方式：</strong> {{ order.get_payment_method_display }}</td>
+                                <td><strong>支付时间：</strong> {{ order.payment_time|date:'Y-m-d H:i' }}</td>
+                            {% endif %}
+                        </tr>
+                    </table>
+
+                    <hr>
+
+                    <!-- 操作按钮 -->
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back();">返回</button>
+                        {% if order.order_status == 'pending' %}
+{#                            <a href="{% url 'check_in' order.order_id %}" class="btn btn-success">办理入住</a>#}
+                        {% endif %}
+                        {% if order.order_status == 'checked_in' %}
+{#                            <a href="{% url 'check_out' order.order_id %}" class="btn btn-warning">办理退房</a>#}
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,154 @@
+/* 移除列表项前面的默认标记（圆点或数字）*/
+.submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* 定义顶部菜单中当前页面的强调样式 */
+.nav-item.active a {
+  background-color: #fff !important;
+  color: #6366F1 !important;
+  font-weight: bold;
+  border-radius: 5px 10px; /* 根据需要调整，确保背景区域与文字间隔自然 */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 设置 active 状态下的菜单项样式 */
+.nav-link.active {
+    background-color: #6366F1 !important;
+    color: #fff !important;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 5px 10px; /* 根据需要调整，确保背景区域与文字间隔自然 */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 用户头像 */
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+
+/* Toast 消息容器，居中靠上 */
+.toast-container {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    pointer-events: none;
+    padding-top: 15px;
+}
+
+/* Toast 消息框样式，与bootstrap样式区分 */
+.self-toast {
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    margin-bottom: 8px;
+    min-width: 300px;
+    max-width: 500px;   /* 限制最大宽度，避免过长 */
+    text-align: center;
+    pointer-events: auto;   /* 允许点击关闭 */
+}
+
+/* Toast 不同消息类型对应的背景色 */
+.toast-error { background: rgba(255, 69, 58, 0.9); }
+.toast-success { background: rgba(40, 167, 69, 0.9); }
+.toast-info { background: rgba(23, 162, 184, 0.9); }
+
+/* Toast 消息的淡出动画 */
+.self-toast.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Toast 关闭按钮 */
+.self-toast .self-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* 让“眼睛”图标更易点按 */
+.toggle-eye {
+    cursor: pointer;
+    margin-left: 8px;
+    color: #666;
+
+}
+/* 动效 */
+.toggle-eye:hover {
+    color: #333;
+}
+
+
+/* 统一所有文本输入框的默认样式 form-control Bootstrap */
+/* 统一所有文本输入框、文本域和下拉框的默认样式 */
+input,
+textarea,
+select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    transition: all 0.5s ease-in-out; /* 过渡动画，0.5s 时间，缓入缓出效果 */
+}
+
+/* 鼠标悬停时的动效：轻微放大 */
+input:hover,
+textarea:hover,
+select:hover {
+    transform: scale(1.01);  /*输入框在鼠标悬停时稍微变大 1% */
+}
+
+/* 聚焦（focus）时的动效：使用主色 #6366F1 */
+input:focus,
+textarea:focus,
+select:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #6366F1; /* 主色边框 */
+    outline: 0;
+    /* 添加阴影及呼吸灯动画效果 */
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.35);
+    animation: pulse 1.5s infinite;
+}
+
+/* 呼吸灯动画关键帧：使中间状态更深 */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.35);
+    }
+    50% {
+        box-shadow: 0 0 0 0.35rem rgba(99, 102, 241, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.35);
+    }
+}
+
+
+
+
+
+
+

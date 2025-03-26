@@ -1,0 +1,10 @@
+{#{% for room_types in room_types %}#}
+{#    <option value="{{ room_types.type_id }}">{{ room_types.type_name }}</option>#}
+{#{% endfor %}#}
+{% for rt in room_types %}
+    <option value="{{ rt.room_type.type_id }}">
+        {{ rt.room_type.type_name }}（剩余 {{ rt.remaining }} 间）
+    </option>
+{% empty %}
+    <option value="" disabled>暂无可用房型</option>
+{% endfor %}

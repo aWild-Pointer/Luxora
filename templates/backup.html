@@ -1,0 +1,98 @@
+<style>
+.wrapper { border: 1px solid #ddd; border-radius: 8px; width: 100%; background: #fff; }
+.room-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.room-table th, .room-table td {
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px;
+    font-size: 16px;
+    white-space: normal;  /* 支持换行 */
+}
+.date-header { font-weight: bold; }
+.weekend { background-color: #FCE4EC; color: #D81B60; }
+.scrollbar-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 240px;
+    right: 0;
+    height: 20px;
+    overflow-x: auto;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+    z-index: 999;
+    cursor: grab;
+}
+</style>
+
+<div class="wrapper">
+  <table class="room-table" id="calendarTable">
+    <thead>
+      <tr>
+        <th style="width: 140px;">房型</th>
+        <th style="width: 80px;">总数</th>
+        {% for date in date_range %}
+          <th class="date-header {% if date.is_weekend %}weekend{% endif %}">
+            {{ date.date_str }}<br>{{ date.weekday_str }}
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in calendar_data %}
+        <tr>
+          <td>{{ item.room_type }}</td>
+          <td>{{ item.room_total }}</td>
+          {% for status in item.daily_status %}
+            <td>
+              剩余: {{ status.remaining }}<br>
+              占用: {{ status.occupied }}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- 滑动条区域 -->
+<div class="scrollbar-bottom" id="bottomScroll">
+  <div id="scrollContent"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rightTable = document.getElementById('calendarTable');
+    const bottomScroll = document.getElementById('bottomScroll');
+    const scrollContent = document.getElementById('scrollContent');
+
+    // 设置底部滚动条宽度
+    scrollContent.style.width = rightTable.scrollWidth + 'px';
+
+    // 滚动联动
+    bottomScroll.addEventListener('scroll', () => {
+        document.querySelector('.wrapper').scrollLeft = bottomScroll.scrollLeft;
+    });
+
+    // 手势拖动
+    let isDragging = false, startX, scrollStart;
+    bottomScroll.addEventListener('mousedown', (e) => {
+        isDragging = true; startX = e.pageX; scrollStart = bottomScroll.scrollLeft;
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+    bottomScroll.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.pageX - startX;
+        bottomScroll.scrollLeft = scrollStart - dx;
+        document.querySelector('.wrapper').scrollLeft = bottomScroll.scrollLeft;
+    });
+
+    // 自动居中今天
+    const todayIndex = {{ today_index|default:0 }};
+    const todayCell = rightTable.querySelectorAll('thead tr:first-child th')[todayIndex + 2]; // +2跳过房型和总数
+    const wrapper = document.querySelector('.wrapper');
+    const centerPos = todayCell.offsetLeft - (wrapper.clientWidth / 2) + (todayCell.clientWidth / 2);
+    wrapper.scrollLeft = centerPos;
+    bottomScroll.scrollLeft = centerPos;
+});
+</script>

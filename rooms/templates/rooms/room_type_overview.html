@@ -1,0 +1,211 @@
+{% extends 'rooms/add_room_type.html' %}
+
+{% block content %}
+<style>
+    /* 主容器样式 */
+    .calendar-wrapper {
+        width: 100%;
+        display: flex;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* 左侧房型、总数固定表 */
+    .left-fixed {
+        width: 240px;
+        border-right: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    .left-fixed .fixed-table th, .left-fixed .fixed-table td {
+        min-width: 115px;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        height: 67px;
+    }
+
+    /* 右侧可横向滚动区域 */
+    .right-scroll {
+        overflow-x: auto;
+        -ms-overflow-style: none;  /* IE/Edge 隐藏滚动条 */
+        scrollbar-width: none;     /* Firefox 隐藏滚动条 */
+    }
+    .right-scroll::-webkit-scrollbar {
+        display: none;             /* Chrome隐藏滚动条 */
+    }
+
+    /* 表格通用单元格样式 */
+    .right-scroll table th, .right-scroll table td {
+        min-width: 120px;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        height: 67px;
+    }
+
+    /* 表头背景 */
+    .right-scroll thead th {
+        background-color: #6c757d;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .light-scroll thead th{
+        background-color: #6366F1;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    /* 明灰隔行效果（加 !important 提高优先级） */
+    .right-scroll tbody tr:nth-child(even) td {
+        background-color: #f5f5f5 !important;
+    }
+    .right-scroll tbody tr:nth-child(odd) td {
+        background-color: #ffffff !important;
+    }
+
+
+    /* 表头灰色调深，带冷灰感 */
+    .right-scroll thead th {
+        background-color: #d1d3d6;  /* 比 #e4e6eb 深，显稳重 */
+        color: #333;                /* 字体深灰 */
+        font-weight: bold;
+    }
+
+    /* 周五、周六红色文字，背景保持一致 */
+    .right-scroll thead th.weekend {
+        color: #D81B60 !important;
+        background-color: #d1d3d6;  /* 灰色与普通日期一致 */
+    }
+
+    /* 今日高亮 */
+    .today-highlight {
+        background-color: #FF7043 !important;
+        color: #fff !important;
+        font-weight: bold;
+        text-align: center;
+        border-left: 2px solid #FF7043;
+        border-right: 2px solid #FF7043;
+    }
+
+    /* 边框粗细 */
+    .right-scroll table th, .right-scroll table td,
+    .left-fixed .fixed-table th, .left-fixed .fixed-table td {
+        border: 2px solid #999;   /* 加粗边框，颜色稍深 */
+    }
+
+
+
+    /* 底部横向滚动条 */
+    .scrollbar-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 250px;
+        right: 0;
+        height: 20px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        background-color: #f9f9f9;
+        border-top: 1px solid #ddd;
+        z-index: 999;
+    }
+    </style>
+
+    <!-- 主体布局 -->
+    <div class="calendar-wrapper">
+        <!-- 左侧房型和总数 -->
+        <div class="left-fixed">
+            <table class="table table-bordered text-center light-scroll fixed-table">
+                <thead>
+                    <!-- 日期范围标题行 -->
+                    <tr>
+                        <th colspan="2">{{ date_range_str }}</th>
+                    </tr>
+                    <tr>
+                        <th>房型</th>
+                        <th>总数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in calendar_data %}
+                    <tr>
+                        <td>{{ item.room_type }}</td>
+                        <td>{{ item.room_total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 右侧日历 -->
+        <div class="right-scroll" id="rightScroll">
+            <div class="table-container">
+                <table class="table table-bordered text-center" id="calendarTable" style="min-width:1600px;">
+                    <thead>
+                        <tr>
+                            <th colspan="{{ date_range|length }}">Luxora· 每日民宿房态表</th>
+                        </tr>
+                        <tr>
+                            {% for date in date_range %}
+                                <th class="{% if date.is_weekend %}weekend{% endif %} {% if date.date_str == today %}today-highlight{% endif %}"
+                                    data-date="{{ date.date_str }}">
+                                    {{ date.date_str }}<br>{{ date.weekday_str }}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in calendar_data %}
+                        <tr>
+                            {% for status in item.daily_status %}
+                            <td>已售: {{ status.occupied }}<br>库存: {{ status.remaining }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部独立滚动条 -->
+    <div class="scrollbar-bottom" id="bottomScroll">
+        <div id="scrollContent"></div>
+    </div>
+
+    <!-- 滚动联动+居中到今天 -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rightScroll = document.getElementById('rightScroll');
+        const bottomScroll = document.getElementById('bottomScroll');
+        const scrollContent = document.getElementById('scrollContent');
+        const calendarTable = document.getElementById('calendarTable');
+
+        // 动态设置底部滚动条宽度
+        scrollContent.style.width = calendarTable.scrollWidth + 'px';
+
+        // 滚动联动：上面滑动到底部
+        rightScroll.addEventListener('scroll', () => {
+            bottomScroll.scrollLeft = rightScroll.scrollLeft;
+        });
+        // 底部滑动联动到主区域
+        bottomScroll.addEventListener('scroll', () => {
+            rightScroll.scrollLeft = bottomScroll.scrollLeft;
+        });
+
+
+        // 自动定位居中到今天
+        const today = "{{ today }}";  // 后端传过来的 '2024-03-26' 格式
+        const todayTh = calendarTable.querySelector(`thead th[data-date="${today}"]`);
+
+        if (todayTh) {
+            const offsetLeft = todayTh.offsetLeft;
+            const scrollPos = offsetLeft - (rightScroll.clientWidth / 2) + (todayTh.clientWidth / 2);
+            rightScroll.scrollTo({ left: scrollPos, behavior: 'smooth' });  // 平滑滚动
+            bottomScroll.scrollLeft = scrollPos;  // 同步底部
+        }
+    });
+    </script>
+{% endblock %}

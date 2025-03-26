@@ -1,0 +1,44 @@
+/* 房间状态指示灯 */
+.room_status {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+
+/* 空闲：绿色 */
+.legend-dot.available,
+.room_status.available {
+    background-color: #28a745;
+}
+
+/* 已预订：橙色 */
+.legend-dot.booked,
+.room_status.booked {
+    background-color: #fd7e14;
+}
+
+/* 已入住：蓝色 */
+.legend-dot.check_in,
+.room_status.check_in {
+    background-color: #007bff;
+}
+
+/* 维护中：灰色 */
+.legend-dot.maintenance,
+.room_status.maintenance {
+    background-color: #6c757d;
+}
+
+/* 打扫中：黄色 */
+.legend-dot.cleaning,
+.room_status.cleaning {
+    background-color: #ffc107;
+}
+
+/* 备房：青绿色 */
+.legend-dot.prepared,
+.room_status.prepared {
+    background-color: #20c997;
+}

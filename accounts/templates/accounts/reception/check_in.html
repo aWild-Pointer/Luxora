@@ -1,0 +1,198 @@
+{% extends "accounts/reception/reception.html" %}
+
+{% block content %}
+<script src="/static/js/order_script.js"></script>
+<div class="container-fluid py-1">
+    <div class="row justify-content-center">
+        {% block frame_content2 %}
+            <div class="col-md-8">
+                <!-- 订单表单卡片 -->
+                <div class="card shadow mt-5 bg-light">
+                    <div class="card-body">
+                        {% block content2 %}
+                            <h2 class="card-title text-center mb-4">入住确认</h2>
+                            <form method="post" id="checkInForm">
+                                {% csrf_token %}
+
+                                <!-- 入住时间及天数 -->
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <!-- 入住日期 -->
+                                        <div class="col-md-3">
+                                            <label for="expected_check_in_date" class="form-label">入住日期</label>
+                                            <input type="date" class="form-control" id="expected_check_in_date" name="expected_check_in_date"
+                                                   value="{{ order.expected_check_in_date|date:'Y-m-d' }}" readonly>
+                                        </div>
+
+                                        <!-- 入住天数 -->
+                                        <div class="col-md-3">
+                                            <label for="days" class="form-label">入住天数</label>
+                                            <input type="number" class="form-control" id="days" name="days"
+                                                   value="{{ order.days }}" readonly>
+                                        </div>
+
+                                        <!-- 离店日期 -->
+                                        <div class="col-md-3">
+                                            <label for="expected_check_out_date" class="form-label">退房日期</label>
+                                            <input type="date" class="form-control" id="expected_check_out_date" name="expected_check_out_date"
+                                                   value="{{ order.expected_check_out_date|date:'Y-m-d' }}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 房型与房号选择 -->
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">房型</label>
+                                            <input type="text" class="form-control" value="{{ order.room_type_snapshot }}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="room_id" class="form-label">房号</label>
+                                            <select class="form-select" id="room_id" name="room_id" required>
+                                                <option value="" hidden disabled selected>请选择房号</option>
+                                                {% for room in room_list %}
+                                                    <option value="{{ room.room_id }}">{{ room.room_number }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 订单人信息 -->
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <label class="form-label">订单人姓名</label>
+                                            <input type="text" class="form-control" id="customer_name" name="customer_name"
+                                                   value="{{ order.customer_name }}" readonly>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">订单人身份证</label>
+                                            <input type="text" class="form-control" id="customer_id_card" name="customer_id_card"
+                                                   value="{{ order.customer_IDcard }}" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">订单人手机号</label>
+                                            <input type="text" class="form-control" id="customer_phone" name="customer_phone"
+                                                   value="{{ order.customer_phone }}" readonly>
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary" onclick="addCustomerAsOccupant()">添加为入住人</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">支付渠道</label>
+                                            <input type="text" class="form-control" id="payment_channel" name="payment_channel"
+                                                   value="{{ order.get_payment_channel_display }}" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">支付金额</label>
+                                            <input type="text" class="form-control" id="payment_amount" name="payment_amount"
+                                                   value="{{ order.amounts }}" readonly></input>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">支付方式</label>
+                                            {% if order.payment_channel == "in_store" %}
+                                            	<select class="form-select" id="payment_method" name="payment_method" required>
+                                                    <option value="" disabled selected hidden>请选择支付方式</option>
+                                                    <option value="alipay">支付宝</option>
+                                                    <option value="wechat">微信</option>
+                                                    <option value="bank_transfer">银行卡</option>
+                                                    <option value="cash">现金</option>
+                                                    <option value="others">其他</option>
+                                                </select>
+                                            {% else %}
+                                            <input type="text" class="form-control" id="payment_method" name="payment_method"
+                                                   value="{{ order.payment_method }}" readonly></input>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <!-- 入住人信息动态添加 -->
+                                <div class="mb-3">
+                                    <label class="form-label">入住人信息</label>
+                                    <div id="occupant-info">
+{#                                        <div class="row occupant-entry"></div>#}
+                                    </div>
+                                    <button type="button" class="btn btn-secondary mt-2" onclick="addOccupant()">添加其他入住人</button>
+                                </div>
+
+
+                                <!-- 提交和返回按钮 -->
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button type="button" class="btn btn-primary" onclick="submitCheckInEdit()">确认入住</button>
+                                    <a href="{% url 'query_check_in' %}?page={{ page }}" class="btn btn-secondary">返回</a>
+                                </div>
+
+                            </form>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function addCustomerAsOccupant() {
+                    let occupantInfo = document.getElementById("occupant-info");
+                    let customerName = document.getElementById("customer_name").value;
+                    let customerIdCard = document.getElementById("customer_id_card").value;
+
+                    if (customerName.trim() === "" || customerIdCard.trim() === "") {
+                        alert("请填写完整的订单人姓名和身份证号！");
+                        return;
+                    }
+
+                    let newOccupant = document.createElement("div");
+                    newOccupant.classList.add("row", "occupant-entry", "mt-2");
+                    newOccupant.innerHTML = `
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="occupant_name[]" value="${customerName}" placeholder="姓名" required>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="occupant_id_card[]" value="${customerIdCard}" placeholder="身份证号" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger" onclick="removeOccupant(this)">删除</button>
+                        </div>
+                    `;
+                    occupantInfo.appendChild(newOccupant);
+                }
+
+                /** 添加入住人 */
+                function addOccupant() {
+                    let occupantInfo = document.getElementById("occupant-info");
+                    let newOccupant = document.createElement("div");
+                    newOccupant.classList.add("row", "occupant-entry", "mt-2");
+                    newOccupant.innerHTML = `
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="occupant_name[]" placeholder="姓名" required>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="occupant_id_card[]" placeholder="身份证号" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger" onclick="removeOccupant(this)">删除</button>
+                        </div>
+                    `;
+                    occupantInfo.appendChild(newOccupant);
+                }
+
+                /** 删除入住人 */
+                function removeOccupant(button) {
+                    button.parentElement.parentElement.remove();
+                }
+
+
+            </script>
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'rooms/add_room_type.html' %}
+
+
+{% block frame_content2 %}
+    <!-- views.py 或者你对应的后端逻辑中，准备好两个列表：dates, rooms -->
+<!-- 这里用 Django 模板举例 -->
+    <style>
+
+        .schedule-container {
+          width: 100%;
+          overflow-x: auto; /* 横向滚动条 */
+          overflow-y: auto; /* 如果想纵向也滚动 */
+          max-height: 600px; /* 你希望的可视高度 */
+        }
+
+        /* 固定表头 */
+        .schedule-table thead th {
+          position: sticky;
+          top: 0;
+          background-color: #f8f9fa; /* 表头背景 */
+          z-index: 10; /* 使其盖住下面的单元格 */
+        }
+
+        /* 固定左侧列(可选) */
+        .schedule-table tbody td:first-child,
+        .schedule-table thead th:first-child {
+          position: sticky;
+          left: 0;
+          background-color: #fff;
+          z-index: 10;
+        }
+    </style>
+
+<!-- 容器，用于控制表格整体宽度、滚动等 -->
+<div class="schedule-container">
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th>房型/日期</th>
+          {% for d in dates %}
+            <th>{{ d|date:"m/d" }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for room in rooms %}
+          <tr>
+            <td>{{ room.name }}</td>
+            {% for d in dates %}
+              <!-- 这里可以根据 room、d 获取相应数据，比如价格、可售数等 -->
+              <td>
+                {{ room_data[room.id][d].price }} 元
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,107 @@
+<style>
+.wrapper {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.room-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.room-table th, .room-table td {
+  border: 1px solid #ddd;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+  font-size: 16px;
+  white-space: normal;
+}
+.room-table th.room-type, .room-table td.room-type { width: 140px; }
+.room-table th.room-count, .room-table td.room-count { width: 80px; }
+.room-table th.date-header, .room-table td.date-cell { min-width: 180px; }
+.weekend { background-color: #FCE4EC; color: #D81B60; }
+.scrollbar-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 240px;
+  right: 0;
+  height: 20px;
+  overflow-x: auto;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ddd;
+  z-index: 999;
+}
+</style>
+
+<div class="wrapper">
+  <table class="room-table" id="calendarTable">
+    <thead>
+      <!-- 日期范围标题行 -->
+      <tr>
+        <th colspan="2">2025-03-21 ~ 2025-04-05</th>
+        <th colspan="{{ date_range|length }}">Luxora 民宿房态</th>
+      </tr>
+
+      <!-- 日期列 -->
+      <tr>
+        <th class="room-type">房型</th>
+        <th class="room-count">总数</th>
+        {% for date in date_range %}
+          <th class="date-header {% if date.is_weekend %}weekend{% endif %}">
+            {{ date.date_str }} {{ date.weekday_str }}
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for item in calendar_data %}
+        <tr>
+          <td class="room-type">{{ item.room_type }}</td>
+          <td class="room-count">{{ item.room_total }}</td>
+          {% for status in item.daily_status %}
+            <td class="date-cell">
+              剩余: {{ status.remaining }}<br>占用: {{ status.occupied }}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- 滑动条 -->
+<div class="scrollbar-bottom" id="bottomScroll">
+  <div id="scrollContent"></div>
+</div>
+
+<!-- 联动、手势、自动居中 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const wrapper = document.querySelector('.wrapper');
+  const bottomScroll = document.getElementById('bottomScroll');
+  const scrollContent = document.getElementById('scrollContent');
+  const table = document.getElementById('calendarTable');
+  scrollContent.style.width = table.scrollWidth + 'px';
+
+  bottomScroll.addEventListener('scroll', () => wrapper.scrollLeft = bottomScroll.scrollLeft);
+
+  // 手势
+  let isDragging = false, startX, scrollStart;
+  bottomScroll.addEventListener('mousedown', (e) => {
+    isDragging = true; startX = e.pageX; scrollStart = bottomScroll.scrollLeft;
+  });
+  window.addEventListener('mouseup', () => isDragging = false);
+  bottomScroll.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.pageX - startX;
+    bottomScroll.scrollLeft = scrollStart - dx;
+    wrapper.scrollLeft = bottomScroll.scrollLeft;
+  });
+
+  // 自动居中今天
+  const todayIndex = {{ today_index|default:0 }};
+  const todayCell = table.querySelectorAll('thead tr:nth-child(2) th')[todayIndex + 2];
+  const centerPos = todayCell.offsetLeft - (wrapper.clientWidth / 2) + (todayCell.clientWidth / 2);
+  wrapper.scrollLeft = centerPos;
+  bottomScroll.scrollLeft = centerPos;
+});
+</script>
