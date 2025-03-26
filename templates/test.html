@@ -1,73 +1,247 @@
-{% extends 'accounts/manager/manager_add_employee.html' %}
+<!DOCTYPE html>
+<html lang="zh-CN">
 
-{% block frame_content2 %}
-    <h1 class="text-center mb-4">员工列表</h1>
-    <div class="container">
-        <div class="row">
-            {% for employee in page_obj %}
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-header">
-                        {{ employee.employee_name }}
+{% load static %}
+<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+<!-- 引入 Bootstrap 的 JS 和 CSS 依赖 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<!-- 自定义样式和脚本 -->
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/list.css' %}">
+<script src="{% static 'js/script.js' %}" defer></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Luxora {% endblock %}</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 防止外部滚动条 */
+        }
+        body { font-family: Arial, sans-serif; }
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+        }
+        /* 顶部导航栏样式 */
+        .navbar {
+            background: #6366F1;
+            color: white;
+            padding: 10px 25px;
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            z-index: 1030;
+        }
+        /* 内容区域 */
+        .content {
+            margin-left: 250px; /* 让主内容区域向右移动 250px，避免被固定侧边栏遮挡 */
+        }
+        /* 导航项 */
+        .nav-item {
+            margin-bottom: 10px;
+        }
+        /* 导航项文本 */
+        .nav-text {
+            font-size: 16px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        /* 去除 Bootstrap 默认的焦点边框 */
+        .btn:focus, .btn:active {
+            box-shadow: none !important;
+        }
+
+        .content{
+            margin: 0 0 0 250px; /* 上 10px，右 15px，下 20px，左 25px */
+        }
+
+        .container {
+            overflow-y: auto; /* 允许内部滚动 */
+            margin: 70px 0 0 0; /* 上 10px，右 15px，下 20px，左 25px */
+            padding: 0;
+        }
+    </style>
+    {% block extra_css %}
+    {% endblock %}
+</head>
+<body>
+
+    <!-- Toast 消息容器 -->
+    <div class="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'error' in message.tags %}
+                    <div class="self-toast toast-error">
+                        {{ message }}
+                        <button class="self-close-btn">&times;</button>
                     </div>
-                    <div class="card-body">
-                        <p><strong>角色:</strong> {{ employee.role }}</p>
-                        <p><strong>工号:</strong> {{ employee.employee_id }}</p>
-                        <p><strong>民宿:</strong> {{ employee.homestay.name }}</p>
-                        <p><strong>手机:</strong> {{ employee.employee_phone }}</p>
-                        <p><strong>身份证:</strong> {{ employee.employee_IDcard }}</p>
-                        <p><strong>通讯地址:</strong> {{ employee.employee_address }}</p>
+                {% elif 'success' in message.tags %}
+                    <div class="self-toast toast-success">
+                        {{ message }}
+                        <button class="self-close-btn">&times;</button>
                     </div>
-                    <div class="card-footer text-center">
-                        <a href="#" class="btn btn-primary btn-sm">详情</a>
-                        <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗？')">删除</a>
+                {% else %}
+                    <div class="self-toast toast-info">
+                        {{ message }}
+                        <button class="self-close-btn">&times;</button>
                     </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <h2 style="color:#6366F1;">Luxora</h2>
+        <ul class="nav flex-column">
+            {% block user %}
+                <li class="nav-item"><strong>菜单栏界面</strong></li>
+            {% endblock %}
+        </ul>
+        <footer class="mt-5">
+            <p class="text-muted">Luxora·民宿客房管理系统</p>
+        </footer>
+    </div>
+    <!-- 主体内容 -->
+    <div class="content">
+        <!-- 顶部导航栏 -->
+        <div class="navbar">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <div>
+                    {% block navbar %}
+                    {% endblock %}
+                </div>
+                <div class="dropdown">
+                    <button class="btn border-0 p-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{% static 'images/user_avatar.png' %}" alt="用户头像" class="rounded-circle avatar-img">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#" onclick="openProfileModal()">修改资料</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="openPasswordModal()">修改密码</a></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">退出登录</a></li>
+                    </ul>
                 </div>
             </div>
-            {% empty %}
-            <div class="col-12 text-center">
-                <p>暂无员工数据</p>
-            </div>
-            {% endfor %}
+        </div>
+        <div class="container">
+            {% block content %}
+                {% if is_weekend %}
+                    <p>今天是周末 🎉</p>
+                {% else %}
+                    <p>今天是工作日 💼</p>
+                {% endif %}
+            {% endblock %}
         </div>
     </div>
 
-    <!-- 分页导航，居中显示 -->
-    <div class="d-flex justify-content-center mt-4">
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="First">
-                        <span aria-hidden="true">&laquo; 第一页</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                        <span aria-hidden="true">上一页</span>
-                    </a>
-                </li>
-                {% endif %}
-
-                <li class="page-item disabled">
-                    <span class="page-link">
-                        第 {{ page_obj.number }} 页，共 {{ page_obj.paginator.num_pages }} 页
-                    </span>
-                </li>
-
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                        <span aria-hidden="true">下一页</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                        <span aria-hidden="true">最后一页 &raquo;</span>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
+    <!-- 用户信息编辑浮窗 (Modal) -->
+    <!-- 表单上增加了 action 和 method 属性，实现传统的表单提交 -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑个人资料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- action 指向处理视图的 URL，method 使用 POST -->
+                    <form id="profileForm" action="{% url 'update_self_info' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3 text-center">
+                            <img id="avatarPreview" src="{% static 'images/user_avatar.png' %}" class="rounded-circle" width="80" height="80" alt="头像">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_name" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="employee_name" name="employee_name" value="{{ request.user.employee_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_phone" class="form-label">手机</label>
+                            <input type="text" class="form-control" id="employee_phone" name="employee_phone" value="{{ request.user.employee_phone }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_address" class="form-label">通讯地址</label>
+                            <input type="text" class="form-control" id="employee_address" name="employee_address" value="{{ request.user.employee_address }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_IDcard" class="form-label">身份证</label>
+                            <input type="text" class="form-control" id="employee_IDcard" name="employee_IDcard" value="{{ request.user.employee_IDcard }}">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <!-- 保存按钮调用 submitProfile() -->
+                    <button type="button" class="btn btn-success" id="saveButton" onclick="submitProfile()">保存</button>
+                    <!-- 移除了加载提示，因为传统提交会刷新页面 -->
+                </div>
+            </div>
+        </div>
     </div>
-{% endblock %}
+
+    <!-- 修改密码浮窗 (Modal) -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">修改密码</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- action 指向处理视图的 URL，method 使用 POST -->
+                    <form id="passwordForm" action="{% url 'update_password' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3 text-center">
+                            <img id="avatarPreview" src="{% static 'images/user_avatar.png' %}" class="rounded-circle" width="80" height="80" alt="头像">
+                        </div>
+                        <!-- 旧密码 -->
+                        <div class="mb-3">
+                            <label for="old_password" class="form-label">
+                                旧密码
+                                <i id="toggle_old" class="far fa-eye toggle-eye" onclick="togglePasswordVisibility('old_password', 'toggle_old')"></i>
+                            </label>
+                            <input type="password" class="form-control" id="old_password" name="old_password">
+                        </div>
+
+                        <!-- 新密码 -->
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">
+                                新密码
+                                <i id="toggle_new" class="far fa-eye toggle-eye" onclick="togglePasswordVisibility('new_password', 'toggle_new')"></i>
+                            </label>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
+                        </div>
+
+                        <!-- 二次确认 -->
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">
+                                二次确认
+                                <i id="toggle_confirm" class="far fa-eye toggle-eye" onclick="togglePasswordVisibility('confirm_password', 'toggle_confirm')"></i>
+                            </label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success" id="saveButton" onclick="submitPasswordEdit()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
+</html>

@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.urls import reverse_lazy
+
+from Luxora.middleware import LogIPMiddleware
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +29,7 @@ SECRET_KEY = 'django-insecure-4p6ql*zwm(7g4&dkd-)x6b=zr7tx-tf30at1ju6)wj#)zj1_yf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # 允许任何主机
 
 
 # Application definition
@@ -39,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'rooms',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'Luxora.middleware.LogIPMiddleware',  # 添加自定义中间件
 ]
 
 ROOT_URLCONF = 'Luxora.urls'
@@ -112,7 +118,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# 设置为中国时区（北京时间）
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -123,7 +130,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
 
 
 # Default primary key field type
@@ -136,6 +145,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ]
 
 AUTH_USER_MODEL = 'accounts.Employee'
+
+# 在 settings.py 中设置登录页面
+# LOGIN_URL = ''
+LOGIN_URL = reverse_lazy('login')  # 使用 URL 名称
 
 # 项目日志配置
 LOGGING = {
@@ -162,12 +175,20 @@ LOGGING = {
             'formatter': 'verbose',  # 使用 verbose 格式
             'encoding': 'utf-8',  # 指定使用 UTF-8 编码
         },
+        'file_rooms': {
+            'level': 'INFO',  # 处理 INFO 级别及以上日志
+            'class': 'logging.FileHandler',  # 使用 FileHandler 将日志写入文件
+            'filename': BASE_DIR / 'rooms.log',  # 将日志写入项目根目录下的 rooms.log 文件
+            'formatter': 'verbose',  # 使用 verbose 格式
+            'encoding': 'utf-8',  # 指定使用 UTF-8 编码
+        },
         # 为 Django 内部日志定义一个文件处理器
         'file_django': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'django.log',  # 日志文件存储在项目根目录下的 django.log 文件
             'formatter': 'verbose',
+            'encoding': 'utf-8',  # 指定使用 UTF-8 编码
         },
         # 控制台处理器，输出到终端
         'console': {
@@ -183,6 +204,11 @@ LOGGING = {
             'level': 'INFO',  # 日志级别设为 INFO
             'propagate': False,  # 不将日志消息传播给父记录器，防止重复记录
         },
+        'rooms': {
+            'handlers': ['file_rooms'],  # 使用 file_rooms 处理器
+            'level': 'INFO',  # 日志级别设为 INFO
+            'propagate': False,  # 不将日志消息传播给父记录器，防止重复记录
+        },
         # 配置 Django 内部日志记录器
         'django': {
             'handlers': ['file_django','console'],  # 使用 file_django 处理器
@@ -191,4 +217,11 @@ LOGGING = {
         },
     },
 }
+#
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#
+# MEDIA_URL = '/media/'  # 访问 URL
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 物理存储位置
+
+
 

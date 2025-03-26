@@ -1,6 +1,5 @@
 {% extends 'rooms/add_room_type.html' %}
 
-
 {% block frame_content2 %}
 
     <style>
@@ -12,61 +11,25 @@
             width: 90%;
             background-color: #fff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 20px; /* 根据需要调整，确保背景区域与文字间隔自然 */
         }
-        /* 表格整体样式 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        /* 表格单元格样式 */
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        /* 表头背景 */
-        th {
-            background-color: #f2f2f2;
-        }
-        /* 奇偶行背景色 */
-        tbody tr:nth-child(even) {
-            background-color: #fbfbfb;
-        }
-        /* 分页导航样式（使用 Flexbox 居中） */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .page-links a {
-            margin: 0 5px;
-            padding: 6px 12px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-            text-decoration: none;
-            color: #333;
-        }
-        .page-links a:hover {
-            background-color: #e9e9e9;
-        }
-        .page-current {
-            margin: 0 5px;
-            padding: 6px 12px;
-            font-weight: bold;
-        }
-        /* 模仿链接文字样式 */
-        .action-button {
-        background: none;
-        border: none;
-        color: #007bff;
-        {#text-decoration: underline;#}
-        cursor: pointer;
-        font-size: inherit;
-        padding: 0;
-    }
 
     </style>
+
+     <!-- 搜索区域 -->
+    <div class="search-container">
+        <form method="GET" action="">
+            <!-- 输入框：按入房型名称搜索 -->
+            <input type="text"
+                   name="search_query"
+                   placeholder="请输入房型名称"
+                   value="{{ request.GET.search_query|default_if_none:'' }}">
+
+            <div class="search-option-text">
+                <button type="submit">搜索</button>
+            </div>
+        </form>
+    </div>
 
     <div class="RoomType-container">
         <h1 style="text-align:center;">房型</h1>
@@ -96,11 +59,12 @@
                         <td>{{ RoomType.total }}</td>
                         <td>{{ RoomType.remaining }}</td>
                         <td style="white-space: nowrap;">
-                            <button type="button" class="action-button" onclick="window.location.href='#'; ">详情</button> |
-                            <button type="button" class="action-button" onclick="window.location.href='#'; ">新增</button> |
-                            <button type="button" class="action-button" onclick="window.location.href='#'; ">删除</button>
-{#                            <button type="button" class="action-button" onclick="window.location.href='#'; "></button>#}
-
+                            <button type="button" class="action-button" onclick="window.location.href='{% url 'room_type_info' RoomType.type_id %}?page={{ page_obj.number }}';">详情</button> |
+                            <button type="button" class="action-button" onclick="window.location.href='{% url 'query_room' RoomType.type_id %}?page={{ page_obj.number }}';">房间</button> |
+                            <button type="button" class="action-button" onclick="if(confirm('房型删除后，以下操作将收到影响，是否确认删除？' +
+                             '\n1. 已取消的订单无法恢复预订；已退房的订单无法撤销退房；' +
+                             '\n2. 办理入住、办理退房时，需要根据系统引导，先修改订单的房型房间后才可正常办理。'))
+                             {window.location.href='{% url 'delete_room_type' RoomType.type_id %}?page={{ page_obj.number }}';} ">删除</button>
                         </td>
                     </tr>
                 {% empty %}
@@ -130,4 +94,5 @@
             </div>
         </div>
     </div>
+
 {% endblock %}

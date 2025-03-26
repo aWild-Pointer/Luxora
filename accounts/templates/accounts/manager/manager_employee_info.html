@@ -1,29 +1,5 @@
 {% extends 'accounts/manager/manager_add_employee.html' %}
 
-{% block function %}
-    <style>
-        /* 设置 active 状态下的菜单项样式 */
-        .nav-link.active {
-            background-color: #6366F1 !important;
-            color: #fff !important;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 5px 10px; /* 根据需要调整，确保背景区域与文字间隔自然 */
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-    </style>
-    <li class="nav-item">
-    <span class="nav-text">员工管理</span>
-    <ul class="submenu">
-        <li>
-            <a class="nav-link" href="{% url 'manager_add_employee' %}">新增员工</a>
-        </li>
-        <li>
-            <a class="na-link active" href="{% url 'manager_query_employee' %}">员工列表</a>
-        </li>
-    </ul>
-
-{% endblock %}
 {% block content2 %}
 <h1 class="text-center mb-4">员工详情</h1>
 <div class="container">
@@ -35,13 +11,13 @@
                  <strong >姓名：</strong>
                 <span id="employee_name_view">{{ employee.employee_name }}</span>
                 <!-- 编辑状态下的输入框，初始使用 d-none 隐藏 -->
-                <input type="text" id="employee_name_edit" name="employee_name" class="form-control d-none" value="{{ employee.employee_name }}">
+                <input type="text" id="employee_name_edit" name="employee_name" class="form-control d-none" value="{{ employee.employee_name }}" required>
             </p>
             <p>
                 <strong>角色：</strong>
                 <span id="employee_role_view">{{ employee.get_role_display }}</span>
                 <select id="employee_role_edit" name="role" class="form-control d-none">
-                    <option value="{{ employee.role }}" hidden="hidden" selected>{{ employee.role }}</option>
+                    <option value="{{ employee.role }}" hidden="" selected>{{ employee.get_role_display }}</option>
                     <option value="manager">民宿管理员</option>
                     <option value="reception">民宿前台</option>
                     <option value="cleaner">民宿保洁</option>
@@ -50,7 +26,7 @@
             <p>
                 <strong>工号：</strong>
                 <span id="employee_id_view">{{ employee.employee_id }}</span>
-                <input type="text" id="employee_id_edit" name="employee_id" class="form-control d-none" value="{{ employee.employee_id }}">
+                <input type="text" id="employee_id_edit" name="employee_id" class="form-control d-none" value="{{ employee.employee_id }}" required>
             </p>
             <p>
                 <strong>民宿：</strong>
@@ -60,17 +36,17 @@
             <p>
                 <strong>手机：</strong>
                 <span id="employee_phone_view">{{ employee.employee_phone }}</span>
-                <input type="text" id="employee_phone_edit" name="employee_phone" class="form-control d-none" value="{{ employee.employee_phone }}">
+                <input type="text" id="employee_phone_edit" name="employee_phone" class="form-control d-none" value="{{ employee.employee_phone }}" required>
             </p>
             <p>
                 <strong>身份证：</strong>
                 <span id="employee_IDcard_view">{{ employee.employee_IDcard }}</span>
-                <input type="text" id="employee_IDcard_edit" name="employee_IDcard" class="form-control d-none" value="{{ employee.employee_IDcard }}">
+                <input type="text" id="employee_IDcard_edit" name="employee_IDcard" class="form-control d-none" value="{{ employee.employee_IDcard }}" required>
             </p>
             <p>
                 <strong>通讯地址：</strong>
                 <span id="employee_address_view">{{ employee.employee_address }}</span>
-                <input type="text" id="employee_address_edit" name="employee_address" class="form-control d-none" value="{{ employee.employee_address }}">
+                <input type="text" id="employee_address_edit" name="employee_address" class="form-control d-none" value="{{ employee.employee_address }}" required>
             </p>
         </div>
         <!-- 初始显示编辑和返回按钮 -->
@@ -82,7 +58,7 @@
         <!-- 编辑状态下显示取消和保存按钮 -->
         <div id="edit_buttons" class="d-none text-center">
             <button type="button" class="btn btn-danger" onclick="toggleEdit(false)">取消</button>
-            <!-- 保存按钮，点击后调用 saveChanges() 函数保存修改 -->
+            <!-- 保存按钮，保存修改 -->
             <button type="submit" class="btn btn-success" onclick="return confirm('确定修改该员工信息吗？');">保存</button>
         </div>
         </form>
@@ -95,14 +71,13 @@
 // true 表示进入编辑模式，false 表示取消编辑模式
 function toggleEdit(editMode) {
     // 切换显示和隐藏视图和编辑状态下的元素
-    var view_elems = document.querySelectorAll('#employee_name_view, #employee_role_view, #employee_id_view, #homestay_view, #employee_phone_view, #employee_IDcard_view, #employee_address_view');
+    const view_elems = document.querySelectorAll('#employee_name_view, #employee_role_view, #employee_id_view, #homestay_view, #employee_phone_view, #employee_IDcard_view, #employee_address_view');
     // 获取所有编辑状态下的输入框
-    var edit_elems = document.querySelectorAll('#employee_name_edit, #employee_role_edit, #employee_id_edit, #homestay_edit, #employee_phone_edit, #employee_IDcard_edit, #employee_address_edit');
+    const edit_elems = document.querySelectorAll('#employee_name_edit, #employee_role_edit, #employee_id_edit, #homestay_edit, #employee_phone_edit, #employee_IDcard_edit, #employee_address_edit');
     // 获取包含查看状态按钮的容器
-    var view_btns = document.getElementById('view_buttons');
+    const view_btns = document.getElementById('view_buttons');
     // 获取包含编辑状态按钮的容器
-    var edit_btns = document.getElementById('edit_buttons');
-
+    const edit_btns = document.getElementById('edit_buttons');
 
     if(editMode) {
         // 进入编辑模式：隐藏查看元素，显示输入框
@@ -126,6 +101,19 @@ function toggleEdit(editMode) {
         // 恢复按钮：显示查看按钮，隐藏编辑按钮
         view_btns.classList.remove('d-none');
         edit_btns.classList.add('d-none');
+
+        // 取消编辑时，清除所有错误提示和样式
+        const inputs = document.querySelectorAll('#employee_name_edit, #employee_role_edit, #employee_id_edit, #homestay_edit, #employee_phone_edit, #employee_IDcard_edit, #employee_address_edit');
+        inputs.forEach(function(input) {
+            // 移除验证样式
+            input.classList.remove('is-invalid', 'is-valid');
+
+            // 清空错误提示
+            const errorElement = input.nextElementSibling;
+            if (errorElement && errorElement.classList.contains('invalid-feedback')) {
+                errorElement.textContent = '';  // 清空错误信息
+            }
+        });
     }
 }
 

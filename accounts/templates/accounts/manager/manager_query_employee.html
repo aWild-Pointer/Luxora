@@ -1,7 +1,16 @@
 {% extends 'accounts/manager/manager_add_employee.html' %}
 
-{% block frame_content2 %}
+{% block content %}
     <style>
+        .search-container {
+            text-align: center;
+        }
+        /* 让搜索框贴合顶部导航栏 */
+        .search-box {
+            margin-top: 0; /* 让其与顶部导航栏贴合 */
+            /* 圆角 */
+            border-radius: 0 0 10px 10px;
+        }
         /* 外层容器样式 */
         .employee-container {
             border: 1px solid #ddd;
@@ -10,64 +19,55 @@
             width: 100%;
             background-color: #fff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 20px; /* 根据需要调整，确保背景区域与文字间隔自然 */
 
         }
-        /* 表格整体样式 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        /* 表格单元格样式 */
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        /* 表头背景 */
-        th {
-            background-color: #f2f2f2;
-        }
-        /* 奇偶行背景色 */
-        tbody tr:nth-child(even) {
-            background-color: #fbfbfb;
-        }
-        /* 分页导航样式（使用 Flexbox 居中） */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .page-links a {
-            margin: 0 5px;
-            padding: 6px 12px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-            text-decoration: none;
-            color: #333;
-        }
-        .page-links a:hover {
-            background-color: #e9e9e9;
-        }
-        .page-current {
-            margin: 0 5px;
-            padding: 6px 12px;
-            font-weight: bold;
-        }
-        /* 模仿链接文字样式 */
-        .action-button {
-        background: none;
-        border: none;
-        color: #007bff;
-        {#text-decoration: underline;#}
-        cursor: pointer;
-        font-size: inherit;
-        padding: 0;
-    }
-
     </style>
 
+    <!-- 搜索区域 -->
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow-sm search-box mt-0">
+                    <div class="card-body">
+                        <div class="search-container">
+                            <form method="GET" action="">
+                                <!-- 输入框：按工号或姓名搜索 -->
+                                <input type="text"
+                                       name="search_query"
+                                       placeholder="请输入员工工号或姓名"
+                                       value="{{ request.GET.search_query|default_if_none:'' }}">
+
+                                <!-- 角色下拉框：如果需要保持搜索后仍显示用户选择的值，则可以对选项进行判断 selected -->
+                                <div class="search-option-text">角色</div>
+                                <select type="select" id="role" name="role">
+                                    <option value="">全部</option>
+                                    <option value="manager" {% if request.GET.role == 'manager' %}selected{% endif %}>民宿管理员</option>
+                                    <option value="reception" {% if request.GET.role == 'reception' %}selected{% endif %}>民宿前台</option>
+                                    <option value="cleaner" {% if request.GET.role == 'cleaner' %}selected{% endif %}>民宿保洁</option>
+                                </select>
+
+                                <div class="search-option-text">状态</div>
+                                <select type="select" id="status" name="status" style="width: 100px">
+                                    <option value="">全部</option>
+                                    <option value="True" {% if request.GET.status == 'True' %}selected{% endif %}>启用</option>
+                                    <option value="False" {% if request.GET.status == 'False' %}selected{% endif %}>禁用</option>
+                                </select>
+
+                                <div class="search-option-text">
+                                    <button type="submit">搜索</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="employee-container">
+
         <h1 style="text-align:center;">员工列表</h1>
         <table>
             <thead>
@@ -98,13 +98,14 @@
                         <td>{{ employee.is_active }}</td>
                         <td style="white-space: nowrap;">
                             <button type="button" class="action-button" onclick="window.location.href='{% url 'manager_employee_info' employee.id %}?page={{ page_obj.number }}'; ">详情</button> |
+                            <button type="button" class="action-button" onclick="window.location.href='{% url 'reset_password' employee.id %}?page={{ page_obj.number }}'; ">重置</button> |
                             {% if employee.employee_id != user.employee_id %}
-                                 <button type="button" class="action-button" onclick="if(confirm('确定删除该账户吗？')){ window.location.href='{% url 'delete_employee' employee.id %}?page={{ page_obj.number }}'; }">删除</button> |
                                 {% if employee.is_active %}
-                                    <button type="button" class="action-button" onclick="if(confirm('确定禁用该账户吗？')) { window.location.href='{% url 'set_is_active' employee.id %}?page={{ page_obj.number }}'; }">禁用账户</button>
+                                    <button type="button" class="action-button" onclick="if(confirm('确定禁用该账户吗？')) { window.location.href='{% url 'set_is_active' employee.id %}?page={{ page_obj.number }}'; }">禁用</button> |
                                 {% else %}
-                                    <button type="button" class="action-button" onclick="if(confirm('确定启用该账户吗？')) { window.location.href='{% url 'set_is_active' employee.id %}?page={{ page_obj.number }}'; }">启用账户</button>
+                                    <button type="button" class="action-button" onclick="if(confirm('确定启用该账户吗？')) { window.location.href='{% url 'set_is_active' employee.id %}?page={{ page_obj.number }}'; }">启用</button> |
                                 {% endif %}
+                                <button type="button" class="action-button" onclick="if(confirm('确定注销该账户吗？')){ window.location.href='{% url 'delete_employee' employee.id %}?page={{ page_obj.number }}'; }">注销</button>
                             {% else %}
                                 <strong>当前账户</strong>
                             {% endif %}

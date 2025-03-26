@@ -1,141 +1,70 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 {% load static %}
-<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+<!-- 引入 Bootstrap 的 JS 和 CSS 依赖 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<!-- 自定义样式和脚本 -->
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/list.css' %}">
+<script src="{% static 'js/script.js' %}" defer></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}title{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>{% block title %} Luxora {% endblock %}</title>
     <style>
         body { font-family: Arial, sans-serif; }
-        .sidebar { 
-            width: 250px; 
-            background: #f8f9fa; 
-            height: 100vh; 
-            padding: 20px; 
-            position: fixed; 
-            top: 0; /* 确保侧边栏从页面顶部开始 */
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            top: 0;
         }
-        .navbar { 
-            background: #6366F1; 
-            color: white; 
-            padding: 10px 25px; 
-            position: fixed; 
-            top: 0; 
-            left: 250px;  /* 从侧边栏宽度处开始 */
-            right: 0; 
+        /* 顶部导航栏样式 */
+        .navbar {
+            background: #6366F1;
+            color: white;
+            padding: 10px 25px;
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
             z-index: 1030;
         }
+        /* 内容区域 */
         .content {
-            margin-left: 250px;
+            margin-left: 250px; /* 让主内容区域向右移动 250px，避免被固定侧边栏遮挡 */
+            margin-top: 70px;
         }
-        /* 去掉所有 submenu 内的默认圆点和内边距 */
-        .submenu {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        /* 调整导航项的间距和字体样式 */
+        /* 导航项 */
         .nav-item {
             margin-bottom: 10px;
         }
+        /* 导航项文本 */
         .nav-text {
             font-size: 16px;
             font-weight: bold;
             display: block;
             margin-bottom: 5px;
         }
-        
-        /* 悬浮提示框 (Toast) 容器，固定在顶部 */
-        .toast-container {
-            position: fixed;
-            top: 0; /* 让提示框紧贴页面顶部 */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1050; /* 确保不被其他元素遮挡 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            pointer-events: none; /* 避免影响页面交互 */
-            padding-top: 15px;
+        /* 去除 Bootstrap 默认的焦点边框 */
+        .btn:focus, .btn:active {
+            box-shadow: none !important;
         }
-        
-        /* 基础 Toast 样式（不包含背景颜色） */
-        /*改名为self-toast，以区分Bootstrap的toast*/
-        .self-toast {
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            opacity: 1;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            margin-bottom: 8px;
-            min-width: 300px;
-            max-width: 500px; /* 限制最大宽度，避免过长 */
-            text-align: center;
-            pointer-events: auto; /* 允许点击关闭 */
-        }
-        /* 不同消息类型对应的背景色 */
-        .toast-error {
-            background: rgba(255, 69, 58, 0.9); /* 红色：错误 */
-        }
-        .toast-success {
-            background: rgba(40, 167, 69, 0.9); /* 绿色：成功 */
-        }
-        .toast-info {
-            background: rgba(23, 162, 184, 0.9); /* 蓝色：其他信息 */
-        }
-        
-        /* Toast 关闭时的动画 */
-        .self-toast.fade-out {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        
-        /* 自定义关闭按钮样式 */
-        .self-toast .self-close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: 10px;
-        }
+
     </style>
     {% block extra_css %}
     {% endblock %}
 </head>
 <body>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let toasts = document.querySelectorAll(".self-toast");
-            toasts.forEach(function (toast) {
-                // 设置5秒后自动消失
-                setTimeout(function () {
-                    toast.classList.add("fade-out");
-                    setTimeout(function () {
-                        toast.style.display = "none";
-                    }, 500);
-                }, 5000);
-                // 关闭按钮事件
-                let closeBtn = toast.querySelector(".self-close-btn");
-                closeBtn.addEventListener("click", function () {
-                    toast.classList.add("fade-out");
-                    setTimeout(function () {
-                        toast.style.display = "none";
-                    }, 500);
-                });
-            });
-        });
-    </script>
-    <!-- 浮动提示框容器（居中靠上） -->
+
+    <!-- Toast 消息容器 -->
     <div class="toast-container">
         {% if messages %}
             {% for message in messages %}
@@ -174,15 +103,126 @@
     <div class="content">
         <!-- 顶部导航栏 -->
         <div class="navbar">
-            <div class="container-fluid">
-                {% block navbar %}
-                {% endblock %}
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <div>
+                    {% block navbar %}
+                    {% endblock %}
+                </div>
+
+                <div class="dropdown d-flex align-items-center">
+                    <p class="mb-0 me-2">个人中心</p>
+                    <button class="btn border-0 p-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{% static 'images/user_avatar.png' %}" alt="用户头像" class="rounded-circle avatar-img">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#" onclick="openProfileModal()">修改资料</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="openPasswordModal()">修改密码</a></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">退出登录</a></li>
+                    </ul>
+                </div>
+
             </div>
         </div>
-        <!-- 页面内容 -->
-        <div class="container mt-4">
+        <div class="container mt-4 ">
             {% block content %}
+                主要内容区域
             {% endblock %}
+        </div>
+    </div>
+
+    <!-- 用户信息编辑浮窗 (Modal) -->
+    <!-- 表单上增加了 action 和 method 属性，实现传统的表单提交 -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑个人资料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- action 指向处理视图的 URL，method 使用 POST -->
+                    <form id="profileForm" action="{% url 'update_self_info' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3 text-center">
+                            <img id="avatarPreview" src="{% static 'images/user_avatar.png' %}" class="rounded-circle" width="80" height="80" alt="头像">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_name" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="employee_name" name="employee_name" value="{{ request.user.employee_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_phone" class="form-label">手机</label>
+                            <input type="text" class="form-control" id="employee_phone" name="employee_phone" value="{{ request.user.employee_phone }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_address" class="form-label">通讯地址</label>
+                            <input type="text" class="form-control" id="employee_address" name="employee_address" value="{{ request.user.employee_address }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employee_IDcard" class="form-label">身份证</label>
+                            <input type="text" class="form-control" id="employee_IDcard" name="employee_IDcard" value="{{ request.user.employee_IDcard }}">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <!-- 保存按钮调用 submitProfile() -->
+                    <button type="button" class="btn btn-success" id="saveButton" onclick="submitProfile()">保存</button>
+                    <!-- 移除了加载提示，因为传统提交会刷新页面 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码浮窗 (Modal) -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">修改密码</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- action 指向处理视图的 URL，method 使用 POST -->
+                    <form id="passwordForm" action="{% url 'update_password' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3 text-center">
+                            <img id="avatarPreview" src="{% static 'images/user_avatar.png' %}" class="rounded-circle" width="80" height="80" alt="头像">
+                        </div>
+                        <!-- 旧密码 -->
+                        <div class="mb-3">
+                            <label for="old_password" class="form-label">
+                                旧密码
+                                <i id="toggle_old" class="far fa-eye-slash toggle-eye" onclick="togglePasswordVisibility('old_password', 'toggle_old')"></i>
+                            </label>
+                            <input type="password" class="form-control" id="old_password" name="old_password">
+                        </div>
+
+                        <!-- 新密码 -->
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">
+                                新密码
+                                <i id="toggle_new" class="far fa-eye-slash toggle-eye" onclick="togglePasswordVisibility('new_password', 'toggle_new')"></i>
+                            </label>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
+                        </div>
+
+                        <!-- 二次确认 -->
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">
+                                二次确认
+                                <i id="toggle_confirm" class="far fa-eye-slash toggle-eye" onclick="togglePasswordVisibility('confirm_password', 'toggle_confirm')"></i>
+                            </label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success" id="saveButton" onclick="submitPasswordEdit()">保存</button>
+                </div>
+            </div>
         </div>
     </div>
 </body>

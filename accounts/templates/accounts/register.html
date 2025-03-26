@@ -1,27 +1,5 @@
 {% extends "accounts/login.html" %}
 {% block content %}
-    <style>
-        .login-container select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-
-        .login-container select:focus {
-            background: #fff;
-            outline: none;
-            transform: scale(1.02);
-        }
-    </style>
 
     <h1>注册 - Luxora</h1>
     <form method="POST" action="{% url 'register' %}">
@@ -36,11 +14,12 @@
             <option value="reception">民宿前台</option>
             <option value="cleaner">民宿保洁</option>
         </select>
-        <input type="password" name="user_password" placeholder="登录密码" required>
+{#        <input type="password" name="user_password" placeholder="登录密码" required>#}
         <button type="submit">注册</button>
     </form>
 
     <div class="links">
         <a href="{% url 'login' %}">已有账户？登录</a>
     </div>
+
 {% endblock %}

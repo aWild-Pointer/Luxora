@@ -3,6 +3,17 @@
 <!-- 覆盖标题块 -->
 {% block title %}清洁员{% endblock %}
 
+
+{% block navbar %}
+    <ul class="nav">
+        <li class="nav-item {% if active_page == 'clean_room' %}active{% endif %}">
+            <a class="nav-link text-white" href="#">首页</a>
+        </li>
+
+
+    </ul>
+{% endblock %}
+
 {% block user %}
     <li class="nav-item"><strong>清洁员界面</strong></li>
 {% endblock %}

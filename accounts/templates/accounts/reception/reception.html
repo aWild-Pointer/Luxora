@@ -4,5 +4,46 @@
 {% block title %}前台{% endblock %}
 
 {% block user %}
-    <li class="nav-item"><strong>前台</strong></li>
+    <li class="nav-item">
+        <strong style="color:#6366F1;">前台账户：{{ user.employee_name }}</strong>
+    {% block function %}
+
+    {% endblock %}
+    </li>
+{% endblock %}
+
+{% block navbar %}
+    <ul class="nav">
+        <li class="nav-item {% if active_page == 'home' %}active{% endif %}">
+            <a class="nav-link text-white" href="{% url 'reception' %}">首页</a>
+        </li>
+        <li class="nav-item {% if active_page == 'book' %}active{% endif %}">
+            <a class="nav-link  text-white" href="{% url 'book' %}">预订</a>
+        </li>
+        <li class="nav-item {% if active_page == 'check_in' %}active{% endif %}">
+            <a class="nav-link  text-white" href="{% url 'query_check_in' %}">入住</a>
+        </li>
+        <li class="nav-item {% if active_page == 'check_out' %}active{% endif %}">
+            <a class="nav-link  text-white" href="{% url 'query_check_out' %}">退房</a>
+        </li>
+
+    </ul>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-8">
+            <div class="p-5 mb-4 bg-light rounded-3 shadow">
+                <h1 class="display-3 text-center" style="color:#6366F1;">欢迎登录 Luxora 民宿客房管理系统</h1>
+                <p class="lead text-center" >
+                    请使用导航栏进入各项管理功能，开始高效管理您的民宿客房。
+                </p>
+                <p class="display-6 text-center" style="color:#6366F1;" >
+                    当前民宿：{{ homestay_name }}
+                </p>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

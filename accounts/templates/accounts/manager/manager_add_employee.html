@@ -1,20 +1,9 @@
 {% extends "accounts/manager/manager.html" %}
 
 <!-- 覆盖标题块 -->
-{% block title %}管理员{% endblock %}
+{% block title %} {{ homestay_name }} 员工管理 {% endblock %}
 
 {% block function %}
-    <style>
-        /* 设置 active 状态下的菜单项样式 */
-        .nav-link.active {
-            background-color: #6366F1 !important;
-            color: #fff !important;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 5px 10px; /* 根据需要调整，确保背景区域与文字间隔自然 */
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-    </style>
     <li class="nav-item">
     <span class="nav-text">员工管理</span>
     <ul class="submenu">
@@ -25,12 +14,14 @@
             <a class="nav-link {% if active_function == 'query_employee' %}active{% endif %}" href="{% url 'manager_query_employee' %}">员工列表</a>
         </li>
     </ul>
+    {% block extra_css %}
 
+    {% endblock %}
 {% endblock %}
 
 
 {% block content %}
-    <div class="container-fluid py-5">
+    <div class="container-fluid py-2">
         <div class="row justify-content-center">
             {% block frame_content2 %}
                 <div class="col-md-6">
@@ -43,20 +34,23 @@
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="id" class="form-label">工号</label>
-                                        <input type="text" class="form-control" id="id" name="id" required pattern="\d+" title="工号只能包含数字">
+                                        <input type="text" class="form-control" id="id" name="id" required>
                                     </div>
-                                    <div class="mb-3">
+                                    <div class="mb-3 ">
                                         <label for="name" class="form-label">姓名</label>
                                         <input type="text" class="form-control" id="name" name="name" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="password" class="form-label">密码</label>
-                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <label for="password" class="form-label">
+                                            密码
+                                            <i id="toggle_confirm" class="far fa-eye-slash toggle-eye" onclick="togglePasswordVisibility('confirm_password', 'toggle_confirm')"></i>
+                                        </label>
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="role" class="form-label">职位</label>
-                                        <select class="form-control" id="role" name="role" required>
-                                            <option value="" disabled selected>请选择职位</option>
+                                        <select class="form-select" id="role" name="role" required>
+                                            <option value="" hidden="hidden" disabled selected>请选择职位</option>
                                             <option value="manager">民宿管理员</option>
                                             <option value="reception">民宿前台</option>
                                             <option value="cleaner">民宿保洁</option>

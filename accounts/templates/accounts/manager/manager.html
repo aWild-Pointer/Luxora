@@ -1,25 +1,24 @@
 {% extends "base.html" %}
 
-<!-- 覆盖标题块 -->
-{% block title %}管理员{% endblock %}
 
 {% comment %}
   在视图中传递了 active_page 变量，其值例如为：
-  'home'、'employee'、'room_status'、'order'、'customer'、'channel'、'statistics'、'settings'
+  'home'、'employee'、'room_status'、'orders'、'customer'、'channel'、'statistics'、'settings'
 {% endcomment %}
 
 {% block extra_css %}
     <style>
-        /* 定义菜单中当前页面的强调样式 */
-        .nav-item.active a {
-          background-color: #fff !important;
-          color: #6366F1 !important;
-          font-weight: bold;
-          border-radius: 5px;
-          transition: background-color 0.3s ease, color 0.3s ease;
-        }
+.chart-container {
+    width: 600px;
+    height: 350px;
+    margin: 0 auto;
+}
+
+
+
     </style>
 {% endblock %}
+
 
 {% block user %}
     <li class="nav-item">
@@ -38,42 +37,161 @@
             <a class="nav-link  text-white" href="{% url 'manager_add_employee' %}">员工</a>
         </li>
         <li class="nav-item {% if active_page == 'room' %}active{% endif %}">
-            <a class="nav-link text-white" href="{% url 'add_room_type' %}">房态</a>
+            <a class="nav-link text-white" href="{% url 'room_type_overview' %}">房态</a>
         </li>
         <li class="nav-item {% if active_page == 'order' %}active{% endif %}">
-            <a class="nav-link text-white" href="#">订单</a>
+            <a class="nav-link text-white" href="{% url 'create_order' %}">订单</a>
         </li>
-        <li class="nav-item {% if active_page == 'customer' %}active{% endif %}">
-            <a class="nav-link text-white" href="#">客户</a>
-        </li>
-        <li class="nav-item {% if active_page == 'channel' %}active{% endif %}">
-            <a class="nav-link text-white" href="#">渠道</a>
-        </li>
+{#        <li class="nav-item {% if active_page == 'customer' %}active{% endif %}">#}
+{#            <a class="nav-link text-white" href="#">客户</a>#}
+{#        </li>#}
+{#        <li class="nav-item {% if active_page == 'channel' %}active{% endif %}">#}
+{#            <a class="nav-link text-white" href="#">渠道</a>#}
+{#        </li>#}
         <li class="nav-item {% if active_page == 'statistics' %}active{% endif %}">
             <a class="nav-link text-white" href="#">统计</a>
         </li>
-        <li class="nav-item {% if active_page == 'settings' %}active{% endif %}">
-            <a class="nav-link text-white" href="#">设置</a>
-        </li>
+{#        <li class="nav-item {% if active_page == 'settings' %}active{% endif %}">#}
+{#            <a class="nav-link text-white" href="#">设置</a>#}
+{#        </li>#}
     </ul>
 {% endblock %}
 
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
-        <div class="col-md-8">
-            <div class="p-5 mb-4 bg-light rounded-3 shadow">
-                <h1 class="display-3 text-center" style="color:#6366F1;">欢迎登录 Luxora 民宿客房管理系统</h1>
-                <p class="lead text-center" >
-                    请使用导航栏进入各项管理功能，开始高效管理您的民宿客房。
-                </p>
-                <p class="display-6 text-center" style="color:#6366F1;" >
-                    当前民宿：{{ homestay_name }}
-                </p>
+{#    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">#}
+{#        <div class="col-md-8">#}
+{#            <div class="p-5 mb-4 bg-light rounded-3 shadow">#}
+{#                <h1 class="display-3 text-center" style="color:#6366F1;">欢迎登录 Luxora 民宿客房管理系统</h1>#}
+{#                <p class="lead text-center" >#}
+{#                    请使用导航栏进入各项管理功能，开始高效管理您的民宿客房。#}
+{#                </p>#}
+{#                <p class="display-6 text-center" style="color:#6366F1;" >#}
+{#                    当前民宿：{{ homestay_name }}#}
+{#                </p>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+
+     <style>
+        .dashboard-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-title {
+            font-size: 1rem;
+            color: #666;
+        }
+        .dashboard-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #000;
+        }
+        .chart-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+     <!-- 统计数据卡片 -->
+    <div class="row py-3 text-center">
+        <div class="col-md-2">
+            <div class="dashboard-card">
+                <div class="dashboard-title">今日预抵</div>
+                <div class="dashboard-number" id="arrival_count">{{ arrival_count }}</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card">
+                <div class="dashboard-title">今日预离</div>
+                <div class="dashboard-number" id="departure_count">{{ departure_count }}</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card">
+                <div class="dashboard-title">已入住</div>
+                <div class="dashboard-number" id="check_in_count">{{ check_in_count }}</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card">
+                <div class="dashboard-title">已退房</div>
+                <div class="dashboard-number" id="pending-orders">{{ check_out_count }}</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card">
+                <div class="dashboard-title">未排房</div>
+                <div class="dashboard-number" id="unassigned-rooms">{{ book_count }}</div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card">
+                <div class="dashboard-title">今日新增订单</div>
+                <div class="dashboard-number" id="pending-orders">{{ today_order_count }}</div>
             </div>
         </div>
     </div>
+
+    <!-- 图表展示 -->
+<!-- 图表展示 -->
+<div class="mt-4 chart-container" style="width: 100%; height: 450px; background: #fff; padding: 20px; overflow: hidden;">
+    <h5 class="text-center">近 7 天入住率</h5>
+    <canvas id="occupancyChart" style="width:100%; height:100%;"></canvas>
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const labels = {{ date_list|safe }};  // 传递["03-01", "03-02", ...]，|safe确保原样输出不转义
+        const occupancyData = {{ occupancy_list|safe }}; // 传递[0.3, 0.4, 0.5, ...]
+
+        // 获取 canvas 画布并初始化 Chart
+        const ctx = document.getElementById("occupancyChart").getContext("2d");
+        new Chart(ctx, {
+            type: "line",  // 折线图
+            data: {
+                labels: labels,  // x轴日期
+                datasets: [{
+                    label: "入住率",
+                    data: occupancyData,  // y轴数据
+                    fill: true,  // 区域填充
+                    backgroundColor: "rgba(54, 162, 235, 0.3)",  // 填充色
+                    borderColor: "rgba(54, 162, 235, 1)",       // 折线颜色
+                    tension: 0.4  // 曲线平滑度
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        bottom: 30  // 给下方坐标留空间
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return (value * 100).toFixed(0) + "%";
+                            }
+                        }
+                    }
+                }
+            }
+
+        });
+    });
+</script>
+
+
+
 {% endblock %}
 
